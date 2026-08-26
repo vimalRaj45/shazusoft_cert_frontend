@@ -1,7 +1,20 @@
 import axios from 'axios';
 
+export const getApiUrl = (path = '') => {
+  const base = import.meta.env.VITE_API_URL || '/api';
+  const cleanBase = base.replace(/\/+$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  
+  if (cleanBase.startsWith('http')) {
+    // If path starts with /api, remove it since base already includes /api
+    const relative = cleanPath.startsWith('/api') ? cleanPath.substring(4) : cleanPath;
+    return `${cleanBase}${relative}`;
+  }
+  return cleanPath.startsWith('/api') ? cleanPath : `/api${cleanPath}`;
+};
+
 const api = axios.create({
-  baseURL: '/api'
+  baseURL: import.meta.env.VITE_API_URL || '/api'
 });
 
 // Request interceptor to attach JWT token
