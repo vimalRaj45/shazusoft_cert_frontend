@@ -631,6 +631,84 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================================================
+   Modals, Confirmation Dialogs & Message Box Spacing
+   ========================================================================== */
+.p-dialog {
+  border-radius: 18px !important;
+  border: 1.5px solid var(--shazu-border) !important;
+  box-shadow: 0 25px 50px -12px rgba(18, 59, 50, 0.25) !important;
+  background: #ffffff !important;
+  overflow: hidden !important;
+}
+
+.p-dialog .p-dialog-header {
+  background: #ffffff !important;
+  padding: 1.25rem 1.5rem 1rem 1.5rem !important;
+  border-bottom: 1.5px solid var(--shazu-border) !important;
+  color: var(--shazu-primary) !important;
+  font-weight: 700 !important;
+}
+
+.p-dialog .p-dialog-content {
+  background: #ffffff !important;
+  padding: 1.5rem 1.75rem !important;
+  color: var(--shazu-text-dark) !important;
+}
+
+.p-dialog .p-dialog-footer {
+  background: #fafaf8 !important;
+  padding: 1rem 1.5rem 1.25rem 1.5rem !important;
+  border-top: 1.5px solid var(--shazu-border) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.75rem !important;
+}
+
+/* Confirmation Modal Specifics */
+.p-confirm-dialog {
+  max-width: 500px !important;
+  width: 90vw !important;
+}
+
+.p-confirm-dialog .p-dialog-content {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 1.25rem !important;
+  padding: 1.75rem 1.75rem 1.5rem 1.75rem !important;
+}
+
+.p-confirm-dialog .p-confirm-dialog-icon {
+  font-size: 2rem !important;
+  color: var(--shazu-copper) !important;
+  flex-shrink: 0 !important;
+  margin-top: 2px !important;
+}
+
+.p-confirm-dialog .p-confirm-dialog-message {
+  font-size: 0.925rem !important;
+  line-height: 1.6 !important;
+  color: var(--shazu-text-dark) !important;
+  font-weight: 500 !important;
+  margin: 0 !important;
+}
+
+/* Enhanced Message Box Padding */
+.p-message {
+  margin: 0 0 1.25rem 0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 6px rgba(18, 59, 50, 0.04) !important;
+}
+
+.p-message .p-message-wrapper {
+  padding: 1rem 1.25rem !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 1rem !important;
+}
+
+/* ==========================================================================
    Mobile & Tablet Adaptive Media Queries
    ========================================================================== */
 @media (max-width: 991px) {
@@ -653,5 +731,11 @@ h1, h2, h3, h4, h5, h6 {
   }
   .p-datatable .p-datatable-tbody > tr > td {
     padding: 0.6rem 0.5rem !important;
+  }
+  .p-dialog .p-dialog-content {
+    padding: 1.15rem !important;
+  }
+  .p-dialog .p-dialog-header {
+    padding: 1rem 1.15rem !important;
   }
 }
