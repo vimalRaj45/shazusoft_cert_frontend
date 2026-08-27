@@ -233,93 +233,68 @@ export default function PublicVerify() {
 
           {/* Body Section */}
           <div className="p-4 md:p-5" style={{ background: '#ffffff' }}>
-            <div className="grid">
-              
-              {/* Left Column: Recipient & Metadata */}
-              <div className="col-12 md:col-7">
-                <div className="mb-4">
-                  <span className="badge-source mb-2 inline-block">Recipient</span>
-                  <h2 className="text-900 font-bold text-3xl m-0 mb-1" style={{ letterSpacing: '-0.5px' }}>
-                    {certificate.recipient_name}
-                  </h2>
-                  <p className="text-indigo-600 font-bold text-lg m-0">
-                    {certificate.course_title}
-                  </p>
+            <div className="mb-4">
+              <span className="badge-source mb-2 inline-block">Recipient</span>
+              <h2 className="text-900 font-bold text-3xl m-0 mb-1" style={{ letterSpacing: '-0.5px', color: '#123B32' }}>
+                {certificate.recipient_name}
+              </h2>
+              <p className="font-bold text-lg m-0" style={{ color: '#C47D4C' }}>
+                {certificate.course_title}
+              </p>
+            </div>
+
+            {/* Metadata Box - Clean Full Width Grid */}
+            <div className="surface-50 border-round-xl p-4 border-1 border-200 mb-4">
+              <div className="grid text-sm">
+                <div className="col-12 sm:col-4 mb-2">
+                  <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1.5" style={{ color: '#527A68' }}>
+                    <Building size={15} style={{ color: '#123B32' }} /> Issuing Organization
+                  </span>
+                  <strong className="text-900 font-bold text-base" style={{ color: '#123B32' }}>
+                    {certificate.issuer || 'Shazu Soft Technologies'}
+                  </strong>
                 </div>
 
-                {/* Metadata Box */}
-                <div className="surface-50 border-round-xl p-3 border-1 border-200 mb-4">
-                  <div className="grid text-sm">
-                    <div className="col-12 sm:col-6 mb-2">
-                      <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1">
-                        <Building size={14} className="text-indigo-600" /> Issuing Organization
-                      </span>
-                      <strong className="text-900 font-bold text-sm">{certificate.issuer}</strong>
-                    </div>
-
-                    <div className="col-12 sm:col-6 mb-2">
-                      <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1">
-                        <Calendar size={14} className="text-indigo-600" /> Issue Date
-                      </span>
-                      <strong className="text-900 font-bold text-sm">
-                        {new Date(certificate.issued_at).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </strong>
-                    </div>
-
-                    <div className="col-12">
-                      <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1">
-                        <Hash size={14} className="text-indigo-600" /> Certificate Identifier
-                      </span>
-                      <span className="font-monospace text-xs bg-white px-3 py-2 border-round-lg border-1 border-300 text-indigo-900 font-bold select-all block shadow-sm">
-                        {certificate.unique_code}
-                      </span>
-                    </div>
-                  </div>
+                <div className="col-12 sm:col-4 mb-2">
+                  <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1.5" style={{ color: '#527A68' }}>
+                    <Calendar size={15} style={{ color: '#123B32' }} /> Issue Date
+                  </span>
+                  <strong className="text-900 font-bold text-base" style={{ color: '#123B32' }}>
+                    {new Date(certificate.issued_at || Date.now()).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </strong>
                 </div>
 
-                {/* Download PDF Button */}
-                {!isRevoked && (
-                  <div className="mb-3">
-                    <a
-                      href={getApiUrl(`/public/certificates/${certificate.unique_code}/download`)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-button p-button-primary p-button-lg w-full no-underline flex justify-content-center align-items-center gap-2 shadow-2 font-bold py-3"
-                    >
-                      <Download size={20} /> Download Official PDF Certificate
-                    </a>
-                    <small className="text-500 block text-center mt-2">
-                      Rendered on-demand in high-resolution vector format
-                    </small>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column: QR Code Authenticator */}
-              <div className="col-12 md:col-5 flex flex-column align-items-center justify-content-center">
-                <div className="surface-50 border-round-2xl p-4 border-1 border-200 text-center w-full max-w-20rem shadow-1">
-                  <div className="text-xs font-bold uppercase text-600 mb-3 flex align-items-center justify-content-center gap-1">
-                    <Lock size={14} className="text-indigo-600" /> Instant QR Authenticator
-                  </div>
-                  
-                  <div className="bg-white p-2 border-round-xl border-1 border-300 inline-block mb-3 shadow-1">
-                    <img
-                      src={getApiUrl(`/public/certificates/${certificate.unique_code}/qr`)}
-                      alt="Verification QR Code"
-                      style={{ width: '160px', height: '160px', display: 'block' }}
-                    />
-                  </div>
-
-                  <p className="text-xs text-600 m-0 line-height-3">
-                    Scan with any smartphone camera to verify authenticity directly on Neon PostgreSQL.
-                  </p>
+                <div className="col-12 sm:col-4 mb-2">
+                  <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1.5" style={{ color: '#527A68' }}>
+                    <Hash size={15} style={{ color: '#123B32' }} /> Verification ID
+                  </span>
+                  <span className="font-monospace text-sm bg-white px-3 py-1.5 border-round-lg border-1 border-300 font-bold select-all inline-block shadow-sm" style={{ color: '#123B32' }}>
+                    {certificate.unique_code}
+                  </span>
                 </div>
               </div>
             </div>
+
+            {/* Download PDF Button */}
+            {!isRevoked && (
+              <div className="mb-4 text-center">
+                <a
+                  href={getApiUrl(`/public/certificates/${certificate.unique_code}/download`)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-button p-button-primary p-button-lg w-full sm:w-auto px-5 no-underline inline-flex justify-content-center align-items-center gap-2 shadow-2 font-bold py-3 text-base"
+                >
+                  <Download size={20} /> Download Official PDF Certificate
+                </a>
+                <small className="text-500 block text-center mt-2">
+                  Rendered on-demand in high-resolution vector PDF format
+                </small>
+              </div>
+            )}
 
             {/* Social Share & LinkedIn Section */}
             {!isRevoked && (

@@ -13,14 +13,18 @@ import { Move, Type, QrCode, Plus, Trash2, Save, Eye, RefreshCw, Sparkles, Wand2
 import api, { getApiUrl } from '../services/api';
 
 const FONT_FAMILIES = [
-  { label: 'Cinzel Classical (Luxury Serif)', value: 'Cinzel, serif' },
-  { label: 'Playfair Display (Academic Serif)', value: 'Playfair Display, serif' },
-  { label: 'Outfit (Modern Brand)', value: 'Outfit, sans-serif' },
-  { label: 'Inter (Clean Minimal)', value: 'Inter, sans-serif' },
-  { label: 'Great Vibes (Script / Calligraphy)', value: 'Great Vibes, cursive' },
-  { label: 'Executive Monospace', value: 'monospace' },
-  { label: 'Standard Sans', value: 'sans-serif' },
-  { label: 'Standard Serif', value: 'serif' }
+  { label: 'Cinzel Classical (Luxury Roman Serif)', value: 'Cinzel' },
+  { label: 'Cinzel Decorative (Ornate Heading)', value: 'Cinzel Decorative' },
+  { label: 'Playfair Display (Academic Serif)', value: 'Playfair Display' },
+  { label: 'Cormorant Garamond (Fine Traditional Serif)', value: 'Cormorant Garamond' },
+  { label: 'UnifrakturCook (Gothic / Blackletter)', value: 'UnifrakturCook' },
+  { label: 'Great Vibes (Flowing Calligraphy Script)', value: 'Great Vibes' },
+  { label: 'Pinyon Script (Royal English Script)', value: 'Pinyon Script' },
+  { label: 'Alex Brush (Signature Script)', value: 'Alex Brush' },
+  { label: 'Outfit (Modern Clean Brand)', value: 'Outfit' },
+  { label: 'Inter (Clean Minimal)', value: 'Inter' },
+  { label: 'Standard Serif', value: 'serif' },
+  { label: 'Standard Sans', value: 'sans-serif' }
 ];
 
 const ALIGN_OPTIONS = [
@@ -54,8 +58,8 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
         x: parseFloat(f.x) || 50,
         y: parseFloat(f.y) || 50,
         font_size: parseInt(f.font_size, 10) || 28,
-        font_color: f.font_color || '#1e293b',
-        font_family: f.font_family || 'sans-serif',
+        font_color: f.font_color || '#123B32',
+        font_family: f.font_family || 'Cinzel',
         font_weight: f.font_weight || 'normal',
         align: f.align || 'center',
         is_required: f.is_required !== undefined ? f.is_required : true,
@@ -63,13 +67,13 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
       })));
       setSelectedFieldId(initialFields[0]?.id || `field_0_${Date.now()}`);
     } else {
-      // Default starter fields
+      // Default starter fields with high contrast dark font defaults
       const defaults = [
-        { id: 'f1', field_key: 'recipient_name', label: 'Recipient Name', x: 50, y: 36, font_size: 42, font_weight: 'bold', font_color: '#ffffff', align: 'center', is_required: true, is_qr: false },
-        { id: 'f2', field_key: 'course_title', label: 'Course / Achievement', x: 50, y: 48, font_size: 26, font_weight: 'bold', font_color: '#fbbf24', align: 'center', is_required: true, is_qr: false },
-        { id: 'f3', field_key: 'issue_date', label: 'Issue Date', x: 28, y: 80, font_size: 18, font_weight: 'normal', font_color: '#94a3b8', align: 'center', is_required: true, is_qr: false },
-        { id: 'f4', field_key: 'unique_code', label: 'Certificate ID', x: 50, y: 90, font_size: 16, font_weight: 'normal', font_color: '#cbd5e1', align: 'center', is_required: true, is_qr: false },
-        { id: 'f5', field_key: 'qr_code', label: 'Verification QR', x: 80, y: 80, font_size: 24, font_weight: 'normal', font_color: '#000000', align: 'center', is_required: false, is_qr: true }
+        { id: 'f1', field_key: 'recipient_name', label: 'Recipient Name', x: 50, y: 36, font_size: 42, font_weight: 'bold', font_color: '#123B32', font_family: 'Cinzel', align: 'center', is_required: true, is_qr: false },
+        { id: 'f2', field_key: 'course_title', label: 'Course / Achievement', x: 50, y: 48, font_size: 26, font_weight: 'bold', font_color: '#C47D4C', font_family: 'Cinzel', align: 'center', is_required: true, is_qr: false },
+        { id: 'f3', field_key: 'issue_date', label: 'Issue Date', x: 28, y: 80, font_size: 18, font_weight: 'normal', font_color: '#334E43', font_family: 'Inter', align: 'center', is_required: true, is_qr: false },
+        { id: 'f4', field_key: 'unique_code', label: 'Certificate ID', x: 50, y: 90, font_size: 14, font_weight: 'normal', font_color: '#527A68', font_family: 'Inter', align: 'center', is_required: true, is_qr: false },
+        { id: 'f5', field_key: 'qr_code', label: 'Verification QR', x: 80, y: 80, font_size: 32, font_weight: 'normal', font_color: '#0f172a', font_family: 'Inter', align: 'center', is_required: false, is_qr: true }
       ];
       setFields(defaults);
       setSelectedFieldId('f1');
@@ -372,7 +376,9 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                   const previewFontSize = Math.max(10, Math.round(f.font_size * scale));
 
                   if (f.is_qr) {
-                    const qrBoxSize = Math.max(36, Math.round(previewFontSize * 2.8));
+                    const baseSize = parseInt(f.font_size, 10) || 32;
+                    const realQrSize = Math.max(140, Math.round(baseSize * 4.8));
+                    const qrBoxSize = Math.max(45, Math.round(realQrSize * scale));
                     return (
                       <Group
                         key={f.id}
@@ -388,21 +394,22 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                           width={qrBoxSize}
                           height={qrBoxSize}
                           fill="#ffffff"
-                          stroke={isSelected ? '#4f46e5' : '#cbd5e1'}
-                          strokeWidth={isSelected ? 3 : 1}
+                          stroke={isSelected ? '#123B32' : '#cbd5e1'}
+                          strokeWidth={isSelected ? 3 : 1.5}
                           cornerRadius={4}
-                          shadowBlur={isSelected ? 10 : 2}
-                          shadowColor={isSelected ? '#4f46e5' : '#000000'}
+                          shadowBlur={isSelected ? 10 : 3}
+                          shadowColor={isSelected ? '#123B32' : 'rgba(0,0,0,0.2)'}
                         />
                         <Text
-                          text="QR"
+                          text="QR CODE"
                           x={-qrBoxSize / 2}
-                          y={-6}
+                          y={-7}
                           width={qrBoxSize}
                           align="center"
-                          fontSize={12}
+                          fontSize={Math.max(10, Math.round(qrBoxSize * 0.18))}
+                          fontFamily="Inter, sans-serif"
                           fontStyle="bold"
-                          fill="#0f172a"
+                          fill={f.font_color || '#123B32'}
                         />
                       </Group>
                     );
@@ -557,7 +564,43 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                 />
               </div>
 
-              {!selectedField.is_qr && (
+              {selectedField.is_qr ? (
+                <>
+                  <div className="grid">
+                    <div className="col-12">
+                      <label className="text-xs font-semibold text-700 block mb-1">QR Code Scale / Size</label>
+                      <InputNumber
+                        value={selectedField.font_size || 32}
+                        onValueChange={(e) => updateSelectedField('font_size', e.value)}
+                        min={20}
+                        max={80}
+                        suffix=" scale"
+                        className="w-full"
+                        inputClassName="p-inputtext-sm w-full"
+                      />
+                      <small className="text-500 block mt-1 text-xs">
+                        Adjust scale from 25 (compact) to 45+ (prominent & crisp).
+                      </small>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-700 block mb-1">QR Code Dark Color</label>
+                    <div className="flex align-items-center gap-2">
+                      <input
+                        type="color"
+                        value={selectedField.font_color || '#0f172a'}
+                        onChange={(e) => updateSelectedField('font_color', e.target.value)}
+                        style={{ width: '38px', height: '38px', padding: 0, border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer' }}
+                      />
+                      <InputText
+                        value={selectedField.font_color || '#0f172a'}
+                        onChange={(e) => updateSelectedField('font_color', e.target.value)}
+                        className="w-full p-inputtext-sm font-monospace text-xs"
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
                 <>
                   {/* Font Size & Weight */}
                   <div className="grid">
@@ -614,7 +657,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                       <div className="flex align-items-center gap-2">
                         <input
                           type="color"
-                          value={selectedField.font_color || '#ffffff'}
+                          value={selectedField.font_color || '#123B32'}
                           onChange={(e) => updateSelectedField('font_color', e.target.value)}
                           style={{ width: '38px', height: '38px', padding: 0, border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer' }}
                         />
