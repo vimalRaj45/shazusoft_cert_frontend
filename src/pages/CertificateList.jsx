@@ -156,7 +156,7 @@ export default function CertificateList() {
             Issued Certificates & Credentials
           </h2>
           <p className="text-500 text-sm m-0">
-            Search, revoke, re-issue, resend Brevo emails, and monitor verification audit logs.
+            Search, revoke, re-issue, resend recipient emails, and monitor verification audit logs.
           </p>
         </div>
       </div>
@@ -319,7 +319,7 @@ export default function CertificateList() {
                 <button
                   type="button"
                   className="action-btn action-btn-primary"
-                  title="Resend Brevo Email"
+                  title="Resend Recipient Email"
                   onClick={() => handleResendEmail(r)}
                 >
                   <Mail size={16} />
@@ -379,7 +379,7 @@ export default function CertificateList() {
               />
             </div>
             <p className="text-xs text-500 mb-3">
-              Scan with any mobile camera to verify credential authenticity on Neon DB.
+              Scan with any mobile camera to verify credential authenticity in real-time.
             </p>
             <a
               href={`/verify/${selectedCert.unique_code}`}
@@ -402,7 +402,7 @@ export default function CertificateList() {
         onHide={() => setAuditVisible(false)}
       >
         <div className="pt-2">
-          <h4 className="text-sm font-bold text-900 mb-2">Brevo Email Logs</h4>
+          <h4 className="text-sm font-bold text-900 mb-2">Email Delivery Logs</h4>
           {auditLogs.emailLogs.length > 0 ? (
             <div className="flex flex-column gap-2 mb-4">
               {auditLogs.emailLogs.map((log) => (

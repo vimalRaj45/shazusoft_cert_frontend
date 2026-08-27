@@ -208,7 +208,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
   const handleAiAnalyze = async () => {
     if (!template?.id) return;
     setAnalyzingAi(true);
-    const toastId = toast.loading('Mistral AI is analyzing certificate font & layout...');
+    const toastId = toast.loading('AI Assistant is analyzing certificate font & layout...');
     try {
       const res = await api.post(`/templates/${template.id}/ai-analyze`);
       const { font_family, primary_color, secondary_color, fields: aiFields } = res.data;
@@ -221,7 +221,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
           x: parseFloat(af.x_percent) || 50,
           y: parseFloat(af.y_percent) || 50,
           font_size: parseInt(af.font_size, 10) || 28,
-          font_family: af.font_family || font_family || 'Cinzel, serif',
+          font_family: af.font_family || font_family || 'Cinzel',
           font_color: af.color || primary_color || '#123B32',
           font_weight: af.field_name === 'recipient_name' ? 'bold' : 'normal',
           align: af.align || 'center',
@@ -232,9 +232,9 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
         setSelectedFieldId(mapped[0]?.id);
       }
 
-      toast.success(`Matched Font: "${font_family || 'Cinzel, serif'}". Layout auto-aligned!`, { id: toastId });
+      toast.success(`Matched Font: "${font_family || 'Cinzel'}". Layout auto-aligned!`, { id: toastId });
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Could not analyze template with Mistral AI', { id: toastId });
+      toast.error(err.response?.data?.message || 'Could not analyze template with AI Assistant', { id: toastId });
     } finally {
       setAnalyzingAi(false);
     }

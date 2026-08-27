@@ -103,142 +103,138 @@ export default function SingleIssue() {
 
   return (
     <div className="p-4" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-      {/* Header */}
       <div className="mb-4">
         <h2 className="text-900 font-bold text-2xl m-0 flex align-items-center gap-2">
           <UserCheck size={24} className="text-indigo-600" />
           Single Certificate Issuance
         </h2>
         <p className="text-500 text-sm m-0">
-          Issue an authenticated certificate to an individual recipient and trigger Brevo transactional email.
+          Issue an authenticated certificate to an individual recipient with automatic email dispatch.
         </p>
       </div>
 
       <div className="grid">
-        {/* Form Column */}
-        <div className="col-12 md:col-7">
+        <div className="col-12 lg:col-7">
           <div className="surface-card border-1 border-200 border-round-xl p-4 shadow-1">
             <form onSubmit={handleIssue} className="flex flex-column gap-3">
-              {/* Template Selector */}
               <div>
-                <label className="block text-900 font-bold text-sm mb-1">Select Certificate Template</label>
+                <label className="block text-900 font-medium text-sm mb-1">Select Certificate Template *</label>
                 <Dropdown
                   value={selectedTemplateId}
                   options={templates.map((t) => ({ label: t.name, value: t.id }))}
                   onChange={(e) => setSelectedTemplateId(e.value)}
-                  placeholder="Select a Template"
-                  className="w-full"
-                  required
+                  placeholder="Choose background layout"
+                  className="w-full p-inputtext-sm"
                 />
               </div>
 
               <Divider className="my-1" />
 
-              {/* Recipient Standard Info */}
-              <div>
-                <label className="block text-900 font-bold text-sm mb-1">Recipient Full Name *</label>
-                <InputText
-                  value={recipientName}
-                  onChange={(e) => setRecipientName(e.target.value)}
-                  placeholder="e.g. Jane Doe"
-                  className="w-full"
-                  required
-                />
+              <div className="grid">
+                <div className="col-12 sm:col-6">
+                  <label className="block text-900 font-medium text-sm mb-1">Recipient Full Name *</label>
+                  <InputText
+                    value={recipientName}
+                    onChange={(e) => setRecipientName(e.target.value)}
+                    placeholder="e.g. Dr. Jane Doe"
+                    className="w-full p-inputtext-sm"
+                    required
+                  />
+                </div>
+                <div className="col-12 sm:col-6">
+                  <label className="block text-900 font-medium text-sm mb-1">Recipient Email *</label>
+                  <InputText
+                    type="email"
+                    value={recipientEmail}
+                    onChange={(e) => setRecipientEmail(e.target.value)}
+                    placeholder="e.g. jane.doe@example.com"
+                    className="w-full p-inputtext-sm"
+                    required
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-900 font-bold text-sm mb-1">Recipient Email Address *</label>
-                <InputText
-                  type="email"
-                  value={recipientEmail}
-                  onChange={(e) => setRecipientEmail(e.target.value)}
-                  placeholder="jane.doe@example.com"
-                  className="w-full"
-                  required
-                />
-              </div>
-
-              {/* Dynamic Template Fields */}
-              {templateFields
-                .filter((f) => f.field_key !== 'recipient_name' && f.field_key !== 'unique_code' && !f.is_qr)
-                .map((field) => (
-                  <div key={field.id || field.field_key}>
-                    <label className="block text-900 font-medium text-sm mb-1">
-                      {field.label} {field.is_required && '*'}
-                    </label>
-                    <InputText
-                      value={fieldData[field.field_key] || ''}
-                      onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
-                      placeholder={`Enter ${field.label}`}
-                      className="w-full"
-                      required={field.is_required}
-                    />
-                  </div>
-                ))}
-
-              <Divider className="my-1" />
-
-              {/* Brevo Email Dispatch Option */}
-              <div className="flex align-items-center justify-content-between p-3 surface-50 border-round-lg border-1 border-200">
-                <div className="flex align-items-center gap-2">
-                  <Mail size={20} className="text-indigo-600" />
-                  <div>
-                    <div className="text-sm font-bold text-900">Send Email via Brevo</div>
-                    <div className="text-xs text-500">Delivers download button & verification links</div>
+              {templateFields.length > 0 && (
+                <div className="surface-50 border-round-lg p-3 border-1 border-200">
+                  <span className="text-xs font-bold text-700 uppercase tracking-wider block mb-2">
+                    Template Dynamic Fields ({templateFields.length})
+                  </span>
+                  <div className="grid">
+                    {templateFields.map((f) => (
+                      <div key={f.id} className="col-12 sm:col-6">
+                        <label className="block text-800 text-xs font-medium mb-1">
+                          {f.label} {f.is_required && '*'}
+                        </label>
+                        <InputText
+                          value={fieldData[f.field_key] || ''}
+                          onChange={(e) => handleFieldChange(f.field_key, e.target.value)}
+                          placeholder={`Enter ${f.label.toLowerCase()}`}
+                          className="w-full p-inputtext-sm"
+                          required={f.is_required}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <InputSwitch
-                  checked={sendEmail}
-                  onChange={(e) => setSendEmail(e.value)}
-                />
+              )}
+
+              <div className="flex align-items-center justify-content-between p-3 surface-50 border-round-lg border-1 border-200">
+                <div className="flex align-items-center gap-2">
+                  <Mail size={18} className="text-indigo-600" />
+                  <div>
+                    <div className="text-sm font-bold text-900">Send Official Certificate Email</div>
+                    <div className="text-xs text-500">Includes secure link & high-resolution attachment</div>
+                  </div>
+                </div>
+                <InputSwitch checked={sendEmail} onChange={(e) => setSendEmail(e.value)} />
               </div>
 
               <Button
                 type="submit"
-                label={sendEmail ? 'Issue & Send Brevo Email' : 'Issue Certificate'}
-                icon="pi pi-send"
-                className="p-button-primary w-full mt-3 py-3 font-bold"
+                label={sendEmail ? 'Issue & Send Email' : 'Issue Certificate'}
+                icon={<Send size={16} className="mr-2" />}
+                className="p-button-primary w-full py-3 font-bold text-base mt-2 shadow-2"
                 loading={issuing}
               />
             </form>
           </div>
         </div>
 
-        {/* Live Summary Preview Column */}
-        <div className="col-12 md:col-5">
-          <div className="surface-card border-1 border-200 border-round-xl p-4 shadow-1">
-            <h4 className="text-900 font-bold text-base m-0 mb-3 flex align-items-center gap-2">
-              <Sparkles size={18} className="text-amber-500" />
-              Live Certificate Preview
-            </h4>
+        <div className="col-12 lg:col-5">
+          <div className="surface-card border-1 border-200 border-round-xl p-4 shadow-1 h-full flex flex-column justify-content-between">
+            <div>
+              <h4 className="text-900 font-bold m-0 mb-3 flex align-items-center gap-2">
+                <CheckCircle size={18} className="text-indigo-600" />
+                Live Issuance Summary
+              </h4>
 
-            {currentTemplate && (
               <div
-                className="border-round-xl p-4 text-center mb-3 relative overflow-hidden shadow-2 flex flex-column justify-content-center"
+                className="w-full border-round-xl p-4 mb-3 text-center relative overflow-hidden shadow-2"
                 style={{
-                  background: currentTemplate.file_url ? `url(${currentTemplate.file_url}) center/cover no-repeat` : 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
-                  minHeight: '220px',
-                  border: '1.5px solid #cbd5e1'
+                  minHeight: '200px',
+                  background: currentTemplate?.file_url ? `url(${currentTemplate.file_url}) center/cover no-repeat` : 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+                  border: '1.5px solid #D3DDD7'
                 }}
               >
-                <div className="cert-title-font text-amber-400 font-bold text-xs tracking-wider mb-2">CERTIFICATE OF ACHIEVEMENT</div>
-                <div className="text-white font-bold text-xl mb-1">{recipientName || 'Recipient Full Name'}</div>
-                <div className="text-amber-300 text-sm font-semibold mb-3">{fieldData.course_title || currentTemplate.name}</div>
-                <div className="text-white-alpha-70 text-xs font-monospace">{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                <div className="bg-black-alpha-70 border-round-lg p-3 text-white">
+                  <div className="text-xs text-amber-400 font-bold uppercase tracking-widest mb-1">CERTIFICATE PREVIEW</div>
+                  <h3 className="text-lg font-bold text-white m-0 mb-1">{recipientName || 'Recipient Full Name'}</h3>
+                  <div className="text-amber-300 text-sm font-semibold mb-3">{fieldData.course_title || currentTemplate?.name || 'Certificate of Achievement'}</div>
+                  <div className="text-xs text-300">ID: Generated automatically on issuance</div>
+                </div>
               </div>
-            )}
 
-            <div className="text-xs text-700 flex flex-column gap-2 bg-indigo-50 p-3 border-round-lg border-1 border-indigo-100">
-              <div className="flex justify-content-between"><strong>Template:</strong> <span>{currentTemplate?.name || 'None'}</span></div>
-              <div className="flex justify-content-between"><strong>Email Dispatch:</strong> <span>{sendEmail ? 'Brevo API (Transactional)' : 'Off'}</span></div>
-              <div className="flex justify-content-between"><strong>Database:</strong> <span>Neon Postgres</span></div>
-              <div className="flex justify-content-between"><strong>Render Pipeline:</strong> <span>On-Demand High-Res Vector PDF</span></div>
+              <div className="text-xs text-600 flex flex-column gap-1 surface-50 p-3 border-round-lg border-1 border-200">
+                <div className="flex justify-content-between"><strong>Template:</strong> <span>{currentTemplate?.name || 'None selected'}</span></div>
+                <div className="flex justify-content-between"><strong>Email Dispatch:</strong> <span>{sendEmail ? 'Enabled (Automated Dispatch)' : 'Off'}</span></div>
+                <div className="flex justify-content-between"><strong>Registry:</strong> <span>Encrypted Cloud Database</span></div>
+                <div className="flex justify-content-between"><strong>Render Pipeline:</strong> <span>On-Demand High-Res Vector PDF</span></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Success Celebration Dialog */}
       <Dialog
         header="Certificate Generated & Authenticated! 🎓"
         visible={successDialog}

@@ -220,7 +220,7 @@ export default function PublicVerify() {
                 <p className="text-xs text-white-alpha-90 m-0 mt-1">
                   {isRevoked
                     ? 'This certificate has been revoked by the issuing organization.'
-                    : 'Cryptographically registered and authenticated on Neon Database.'}
+                    : 'Cryptographically registered and authenticated in the Official Verification Registry.'}
                 </p>
               </div>
             </div>

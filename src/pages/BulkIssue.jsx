@@ -16,11 +16,11 @@ import confetti from 'canvas-confetti';
 import api from '../services/api';
 
 const SAMPLE_CSV = `Recipient Name,Recipient Email,Course Title,Grade,Issue Date
-Alice Johnson,alice.johnson@example.com,Full Stack AI Architecture,Distinction,2026-08-27
-Bob Smith,bob.smith@example.com,Advanced React & Fastify Masterclass,Merit,2026-08-27
-Charlie Brown,charlie.brown@example.com,Cloud Engineering with Neon & S3,Pass with Honors,2026-08-27
-Diana Prince,diana.prince@example.com,Cybersecurity & Identity Systems,High Distinction,2026-08-27
-Evan Wright,evan.wright@example.com,Full Stack AI Architecture,Distinction,2026-08-27`;
+Alice Johnson,alice.johnson@example.com,Executive Leadership & Innovation,Distinction,2026-08-27
+Bob Smith,bob.smith@example.com,Advanced Enterprise Architecture,Merit,2026-08-27
+Charlie Brown,charlie.brown@example.com,Cloud Architecture & Security Systems,Pass with Honors,2026-08-27
+Diana Prince,diana.prince@example.com,Cybersecurity & Identity Governance,High Distinction,2026-08-27
+Evan Wright,evan.wright@example.com,Executive Leadership & Innovation,Distinction,2026-08-27`;
 
 export default function BulkIssue() {
   const [templates, setTemplates] = useState([]);
@@ -237,7 +237,7 @@ export default function BulkIssue() {
             Bulk CSV Certificate Issuance
           </h2>
           <p className="text-500 text-sm m-0">
-            Upload CSV list of recipients, auto-map columns, validate rows, and queue Brevo transactional dispatches.
+            Upload CSV list of recipients, auto-map columns, validate rows, and queue automated email dispatches.
           </p>
         </div>
         <Button
@@ -262,7 +262,7 @@ export default function BulkIssue() {
             />
 
             <div className="flex align-items-center justify-content-between p-3 surface-50 border-round-lg border-1 border-200">
-              <span className="text-sm font-bold text-900">Send Emails via Brevo</span>
+              <span className="text-sm font-bold text-900">Send Recipient Emails</span>
               <InputSwitch
                 checked={sendEmail}
                 onChange={(e) => setSendEmail(e.value)}
@@ -348,7 +348,7 @@ export default function BulkIssue() {
               <div className="flex justify-content-between align-items-center mb-2">
                 <span className="font-bold text-sm text-indigo-900 flex align-items-center gap-2">
                   <RefreshCw size={16} className="pi-spin text-indigo-600" />
-                  Dispatching Batch via Brevo Queue...
+                  Dispatching Batch & Generating Certificates...
                 </span>
                 <span className="font-bold text-sm text-indigo-700">{progressPercent}%</span>
               </div>
