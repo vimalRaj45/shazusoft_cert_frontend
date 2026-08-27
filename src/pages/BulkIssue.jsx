@@ -11,16 +11,9 @@ import { confirmDialog } from 'primereact/confirmdialog';
 import toast from 'react-hot-toast';
 import { InputSwitch } from 'primereact/inputswitch';
 import { FileUpload } from 'primereact/fileupload';
-import { FileSpreadsheet, Upload, CheckCircle, AlertTriangle, Play, RefreshCw, Sparkles } from 'lucide-react';
+import { FileSpreadsheet, Upload, CheckCircle, AlertTriangle, Play, RefreshCw, Sparkles, Download } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import api from '../services/api';
-
-const SAMPLE_CSV = `Recipient Name,Recipient Email,Course Title,Grade,Issue Date
-Alice Johnson,alice.johnson@example.com,Executive Leadership & Innovation,Distinction,2026-08-27
-Bob Smith,bob.smith@example.com,Advanced Enterprise Architecture,Merit,2026-08-27
-Charlie Brown,charlie.brown@example.com,Cloud Architecture & Security Systems,Pass with Honors,2026-08-27
-Diana Prince,diana.prince@example.com,Cybersecurity & Identity Governance,High Distinction,2026-08-27
-Evan Wright,evan.wright@example.com,Executive Leadership & Innovation,Distinction,2026-08-27`;
 
 export default function BulkIssue() {
   const [templates, setTemplates] = useState([]);
@@ -40,6 +33,8 @@ export default function BulkIssue() {
   const [progressPercent, setProgressPercent] = useState(0);
 
   const pollIntervalRef = useRef(null);
+
+  const currentTemplate = templates.find((t) => t.id === selectedTemplateId);
 
   useEffect(() => {
     fetchTemplates();
@@ -64,7 +59,12 @@ export default function BulkIssue() {
   useEffect(() => {
     if (selectedTemplateId) {
       api.get(`/templates/${selectedTemplateId}`).then((res) => {
-        setTemplateFields(res.data.fields || []);
+        const fields = res.data.fields || [];
+        setTemplateFields(fields);
+        // If there are already parsed rows, re-map and re-validate against this new template
+        if (parsedRows.length > 0) {
+          processParsedData(parsedRows, csvHeaders, fields);
+        }
       });
     }
   }, [selectedTemplateId]);
@@ -78,23 +78,81 @@ export default function BulkIssue() {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        processParsedData(results.data, results.meta.fields || []);
+        processParsedData(results.data, results.meta.fields || [], templateFields);
       }
     });
   };
 
+  // Generate blank downloadable CSV template with exact matching columns
+  const downloadTemplateCSV = () => {
+    const headers = ['Recipient Name', 'Recipient Email'];
+    const customFields = templateFields.filter(
+      (f) => !f.is_qr && f.field_key !== 'unique_code' && f.field_key !== 'recipient_name' && f.field_key !== 'recipient_email'
+    );
+    customFields.forEach((f) => headers.push(f.label || f.field_key));
+
+    const csvContent = headers.join(',') + '\n' +
+      `"Dr. Jane Doe","jane.doe@example.com",` +
+      customFields.map((f) => `"Sample ${f.label || f.field_key}"`).join(',') + '\n';
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${(currentTemplate?.name || 'certificate').toLowerCase().replace(/[^a-z0-9]/g, '_')}_template.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success('Downloaded matching CSV template!');
+  };
+
+  // Load sample 5 rows tailored dynamically to current template fields
   const loadSampleCSV = () => {
-    Papa.parse(SAMPLE_CSV, {
+    const customFields = templateFields.filter(
+      (f) => !f.is_qr && f.field_key !== 'unique_code' && f.field_key !== 'recipient_name' && f.field_key !== 'recipient_email'
+    );
+
+    const samplePersons = [
+      { name: 'Dr. Alexander Morgan', email: 'alexander.morgan@example.com' },
+      { name: 'Prof. Evelyn Reed', email: 'evelyn.reed@example.com' },
+      { name: 'Michael Sterling', email: 'michael.sterling@example.com' },
+      { name: 'Sophia Vance', email: 'sophia.vance@example.com' },
+      { name: 'David Kensington', email: 'david.kensington@example.com' }
+    ];
+
+    const generatedRows = samplePersons.map((p, idx) => {
+      const row = {
+        'Recipient Name': p.name,
+        'Recipient Email': p.email
+      };
+      customFields.forEach((f) => {
+        const key = f.label || f.field_key;
+        if (f.field_key === 'course_title' || f.field_key.includes('title') || f.field_key.includes('course')) {
+          row[key] = currentTemplate?.name || 'Award Certificate of Excellence';
+        } else if (f.field_key === 'issue_date' || f.field_key.includes('date')) {
+          row[key] = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        } else if (f.field_key.includes('grade') || f.field_key.includes('honors')) {
+          row[key] = idx % 2 === 0 ? 'High Distinction' : 'Distinction';
+        } else {
+          row[key] = `Sample ${f.label || f.field_key}`;
+        }
+      });
+      return row;
+    });
+
+    const csvString = Papa.unparse(generatedRows);
+    Papa.parse(csvString, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        processParsedData(results.data, results.meta.fields || []);
-        toast.success('Loaded 5 sample recipients');
+        processParsedData(results.data, results.meta.fields || [], templateFields);
+        toast.success(`Loaded 5 sample recipients for "${currentTemplate?.name || 'template'}"`);
       }
     });
   };
 
-  const processParsedData = (rows, headers) => {
+  const processParsedData = (rows, headers, fieldsToMap = templateFields) => {
     setParsedRows(rows);
     setCsvHeaders(headers);
 
@@ -102,13 +160,28 @@ export default function BulkIssue() {
     const autoMap = {};
     headers.forEach((h) => {
       const norm = h.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (norm.includes('name')) autoMap[h] = 'recipient_name';
-      else if (norm.includes('email') || norm.includes('mail')) autoMap[h] = 'recipient_email';
-      else if (norm.includes('course') || norm.includes('title')) autoMap[h] = 'course_title';
-      else if (norm.includes('date')) autoMap[h] = 'issue_date';
-      else if (norm.includes('grade')) autoMap[h] = 'grade';
-      else autoMap[h] = norm;
+      if (norm.includes('name') || norm === 'recipient') {
+        autoMap[h] = 'recipient_name';
+      } else if (norm.includes('email') || norm.includes('mail')) {
+        autoMap[h] = 'recipient_email';
+      } else {
+        // Match against template fields
+        const match = fieldsToMap.find(
+          (f) => f.field_key.toLowerCase().replace(/[^a-z0-9]/g, '') === norm ||
+                 (f.label && f.label.toLowerCase().replace(/[^a-z0-9]/g, '') === norm)
+        );
+        if (match) {
+          autoMap[h] = match.field_key;
+        } else if (norm.includes('course') || norm.includes('title')) {
+          autoMap[h] = 'course_title';
+        } else if (norm.includes('date')) {
+          autoMap[h] = 'issue_date';
+        } else {
+          autoMap[h] = norm;
+        }
+      }
     });
+
     setColumnMapping(autoMap);
     validateRows(rows, autoMap);
   };
@@ -274,7 +347,18 @@ export default function BulkIssue() {
         <div className="col-12 md:col-6">
           <div className="surface-card border-1 border-200 border-round-xl p-4 shadow-1 h-full flex flex-column justify-content-between">
             <div>
-              <h4 className="text-900 font-bold text-base m-0 mb-2">2. Upload Recipients CSV</h4>
+              <div className="flex align-items-center justify-content-between mb-2">
+                <h4 className="text-900 font-bold text-base m-0">2. Upload Recipients CSV</h4>
+                <button
+                  type="button"
+                  onClick={downloadTemplateCSV}
+                  className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer bg-transparent border-none p-0 flex align-items-center gap-1 underline"
+                  title="Download CSV format matching this template"
+                >
+                  <Download size={13} /> Download Blank CSV Template
+                </button>
+              </div>
+
               <FileUpload
                 mode="basic"
                 name="recipients_csv"
@@ -283,11 +367,32 @@ export default function BulkIssue() {
                 auto={false}
                 chooseLabel={csvFile ? csvFile.name : "Select Recipients CSV"}
                 onSelect={handleFileUpload}
-                className="w-full mb-2"
+                className="w-full mb-3"
               />
-              <small className="text-500 block mt-2" style={{ fontSize: '11.5px' }}>
-                Supported columns: Recipient Name, Recipient Email, Course Title, Issue Date, Grade, etc.
-              </small>
+
+              {/* Dynamic CSV Expected Columns Display */}
+              <div className="surface-50 border-round-lg p-3 border-1 border-200">
+                <div className="text-xs font-bold text-700 uppercase tracking-wider mb-2">
+                  Expected CSV Columns for &quot;{currentTemplate?.name || 'Selected Template'}&quot;:
+                </div>
+                <div className="flex flex-wrap gap-1.5 align-items-center">
+                  <Tag severity="info" value="Recipient Name *" className="text-xs font-semibold" />
+                  <Tag severity="info" value="Recipient Email *" className="text-xs font-semibold" />
+                  {templateFields
+                    .filter((f) => !f.is_qr && f.field_key !== 'unique_code' && f.field_key !== 'recipient_name' && f.field_key !== 'recipient_email')
+                    .map((f) => (
+                      <Tag
+                        key={f.id || f.field_key}
+                        severity={f.is_required !== false ? "warning" : "secondary"}
+                        value={`${f.label || f.field_key} ${f.is_required !== false ? '*' : '(optional)'}`}
+                        className="text-xs font-semibold"
+                      />
+                    ))}
+                </div>
+                <small className="text-500 block mt-2 text-xs">
+                  * Fields marked with * are required. You can auto-match or manually map CSV headers below.
+                </small>
+              </div>
             </div>
           </div>
         </div>
@@ -328,11 +433,13 @@ export default function BulkIssue() {
                     options={[
                       { label: 'Recipient Name *', value: 'recipient_name' },
                       { label: 'Recipient Email *', value: 'recipient_email' },
-                      { label: 'Course Title', value: 'course_title' },
-                      { label: 'Issue Date', value: 'issue_date' },
-                      { label: 'Grade / Honors', value: 'grade' },
-                      { label: 'Instructor Name', value: 'instructor_name' },
-                      { label: '— Ignore Column —', value: 'ignore' }
+                      ...templateFields
+                        .filter((f) => !f.is_qr && f.field_key !== 'unique_code' && f.field_key !== 'recipient_name' && f.field_key !== 'recipient_email')
+                        .map((f) => ({
+                          label: `${f.label || f.field_key} ${f.is_required !== false ? '*' : '(optional)'}`,
+                          value: f.field_key
+                        })),
+                      { label: '— Ignore / Exclude Column —', value: 'ignore' }
                     ]}
                     onChange={(e) => handleMappingChange(header, e.value)}
                     className="w-full p-inputtext-sm"
