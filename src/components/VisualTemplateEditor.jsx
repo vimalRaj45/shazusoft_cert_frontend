@@ -76,17 +76,62 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
     }
   }, [initialFields, template]);
 
-  // Load Background Image
+  // Load Background Image with multi-layer fallback
   useEffect(() => {
-    if (template?.file_url) {
-      const img = new window.Image();
-      img.crossOrigin = 'Anonymous';
-      img.src = template.file_url;
-      img.onload = () => setBgImage(img);
-      img.onerror = () => setBgImage(null);
-    } else {
+    if (!template?.file_url) {
       setBgImage(null);
+      return;
     }
+
+    let isMounted = true;
+    
+    // Candidates to try loading in order:
+    // 1. Direct file_url
+    // 2. Direct file_url without crossOrigin
+    // 3. Backend template image route (/api/templates/:id/image)
+    const urlsToTry = [
+      template.file_url,
+      template.id ? `/api/templates/${template.id}/image` : null
+    ].filter(Boolean);
+
+    const tryLoadImage = (urlIndex, useAnonymous) => {
+      if (urlIndex >= urlsToTry.length) {
+        console.warn('Failed all attempts to load template background image:', template.file_url);
+        if (isMounted) setBgImage(null);
+        return;
+      }
+
+      const currentUrl = urlsToTry[urlIndex];
+      const img = new window.Image();
+      
+      if (useAnonymous) {
+        img.crossOrigin = 'Anonymous';
+      }
+
+      img.onload = () => {
+        if (isMounted) {
+          setBgImage(img);
+        }
+      };
+
+      img.onerror = () => {
+        // If Anonymous failed (common with R2 lacking CORS headers), retry same URL without crossOrigin
+        if (useAnonymous) {
+          tryLoadImage(urlIndex, false);
+        } else {
+          // Otherwise proceed to next candidate URL (backend proxy)
+          tryLoadImage(urlIndex + 1, true);
+        }
+      };
+
+      img.src = currentUrl;
+    };
+
+    tryLoadImage(0, true);
+
+    return () => {
+      isMounted = false;
+    };
   }, [template]);
 
   // Resize canvas responsively
