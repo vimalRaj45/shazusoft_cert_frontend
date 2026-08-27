@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import axios from 'axios';
+import { getApiUrl } from '../services/api';
 
 export default function PublicVerify() {
   const { code } = useParams();
@@ -37,15 +38,17 @@ export default function PublicVerify() {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`/api/public/verify/${code}`);
+      const res = await axios.get(getApiUrl(`/public/verify/${code}`));
       setCertData(res.data);
 
-      if (res.data.valid) {
+      if (res.data?.valid) {
         confetti({
           particleCount: 60,
           spread: 70,
           origin: { y: 0.5 }
         });
+      } else if (res.data && !res.data.valid) {
+        setError(res.data.message || 'This credential is no longer valid.');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Certificate not found or verification expired.');
@@ -133,7 +136,7 @@ export default function PublicVerify() {
     );
   }
 
-  if (error || !certData) {
+  if (error || !certData || !certData.certificate) {
     return (
       <div className="flex flex-column align-items-center justify-content-center min-h-screen p-4 surface-ground">
         <div className="surface-card border-round-2xl p-6 shadow-4 text-center border-1 border-red-200" style={{ maxWidth: '520px', background: '#ffffff' }}>
@@ -141,7 +144,7 @@ export default function PublicVerify() {
             <ShieldAlert size={36} />
           </div>
           <h2 className="text-900 font-bold text-2xl mb-2">Invalid Certificate</h2>
-          <p className="text-600 text-sm mb-4">{error || 'This credential could not be verified in our records.'}</p>
+          <p className="text-600 text-sm mb-4">{error || certData?.message || 'This credential could not be verified in our records.'}</p>
           <div className="p-3 surface-50 border-round font-monospace text-xs text-500 mb-4 border-1 border-200">
             Code: {code}
           </div>
@@ -153,7 +156,8 @@ export default function PublicVerify() {
     );
   }
 
-  const { certificate, valid, status } = certData;
+  const certificate = certData.certificate || {};
+  const status = certData.status || certificate.status || 'issued';
   const isRevoked = status === 'revoked';
 
   // LinkedIn Add to Profile URL
@@ -164,10 +168,10 @@ export default function PublicVerify() {
   const issueMonth = issueDateObj.getMonth() + 1;
   const verifyUrl = window.location.href;
 
-  const linkedinAddUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${courseEncoded}&organizationName=${orgNameEncoded}&issueYear=${issueYear}&issueMonth=${issueMonth}&certUrl=${encodeURIComponent(verifyUrl)}&certId=${certificate.unique_code}`;
+  const linkedinAddUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${courseEncoded}&organizationName=${orgNameEncoded}&issueYear=${issueYear}&issueMonth=${issueMonth}&certUrl=${encodeURIComponent(verifyUrl)}&certId=${certificate.unique_code || code}`;
   const linkedinShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(verifyUrl)}`;
-  const whatsappShareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`🎓 Verified Credential: Check out my certified achievement for "${certificate.course_title}" authenticated by ${certificate.issuer}: ${verifyUrl}`)}`;
-  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Proud to share my verified certificate for "${certificate.course_title}" issued by ${certificate.issuer}! 🎓`)}&url=${encodeURIComponent(verifyUrl)}`;
+  const whatsappShareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`🎓 Verified Credential: Check out my certified achievement for "${certificate.course_title || 'Certificate of Achievement'}" authenticated by ${certificate.issuer || 'Shazu Soft Technologies'}: ${verifyUrl}`)}`;
+  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Proud to share my verified certificate for "${certificate.course_title || 'Certificate of Achievement'}" issued by ${certificate.issuer || 'Shazu Soft Technologies'}! 🎓`)}&url=${encodeURIComponent(verifyUrl)}`;
 
   return (
     <div className="min-h-screen py-5 px-3 md:px-5" style={{ background: '#F5F3EC' }}>
@@ -281,7 +285,7 @@ export default function PublicVerify() {
                 {!isRevoked && (
                   <div className="mb-3">
                     <a
-                      href={`/api/public/certificates/${certificate.unique_code}/download`}
+                      href={getApiUrl(`/public/certificates/${certificate.unique_code}/download`)}
                       target="_blank"
                       rel="noreferrer"
                       className="p-button p-button-primary p-button-lg w-full no-underline flex justify-content-center align-items-center gap-2 shadow-2 font-bold py-3"
@@ -304,7 +308,7 @@ export default function PublicVerify() {
                   
                   <div className="bg-white p-2 border-round-xl border-1 border-300 inline-block mb-3 shadow-1">
                     <img
-                      src={`/api/public/certificates/${certificate.unique_code}/qr`}
+                      src={getApiUrl(`/public/certificates/${certificate.unique_code}/qr`)}
                       alt="Verification QR Code"
                       style={{ width: '160px', height: '160px', display: 'block' }}
                     />
@@ -393,7 +397,7 @@ export default function PublicVerify() {
             </h3>
             <div className="border-round-xl overflow-hidden border-1 border-300 shadow-2 p-1" style={{ background: '#0f172a' }}>
               <img
-                src={`/api/public/certificates/${certificate.unique_code}/preview`}
+                src={getApiUrl(`/public/certificates/${certificate.unique_code}/preview`)}
                 alt="Official Certificate"
                 style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }}
                 loading="lazy"

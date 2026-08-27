@@ -9,7 +9,7 @@ import { Dialog } from 'primereact/dialog';
 import { confirmDialog } from 'primereact/confirmdialog';
 import toast from 'react-hot-toast';
 import { ShieldCheck, Search, Download, QrCode, Mail, Ban, CheckCircle2, Copy, ExternalLink, Activity } from 'lucide-react';
-import api from '../services/api';
+import api, { getApiUrl } from '../services/api';
 
 export default function CertificateList() {
   const [certificates, setCertificates] = useState([]);
@@ -296,7 +296,7 @@ export default function CertificateList() {
               <div className="flex align-items-center gap-2">
                 {/* Download on demand */}
                 <a
-                  href={`/api/public/certificates/${r.unique_code}/download`}
+                  href={getApiUrl(`/public/certificates/${r.unique_code}/download`)}
                   target="_blank"
                   rel="noreferrer"
                   className="action-btn action-btn-primary"
@@ -373,7 +373,7 @@ export default function CertificateList() {
           <div className="text-center pt-2">
             <div className="p-3 surface-50 border-round-xl border-1 border-200 inline-block mb-3">
               <img
-                src={`/api/public/certificates/${selectedCert.unique_code}/qr`}
+                src={getApiUrl(`/public/certificates/${selectedCert.unique_code}/qr`)}
                 alt="Verification QR Code"
                 style={{ width: '220px', height: '220px', display: 'block' }}
               />

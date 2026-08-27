@@ -10,7 +10,7 @@ import { Divider } from 'primereact/divider';
 import { ColorPicker } from 'primereact/colorpicker';
 import toast from 'react-hot-toast';
 import { Move, Type, QrCode, Plus, Trash2, Save, Eye, RefreshCw, Sparkles, Wand2, Download } from 'lucide-react';
-import api from '../services/api';
+import api, { getApiUrl } from '../services/api';
 
 const FONT_FAMILIES = [
   { label: 'Cinzel Classical (Luxury Serif)', value: 'Cinzel, serif' },
@@ -91,7 +91,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
     // 3. Backend template image route (/api/templates/:id/image)
     const urlsToTry = [
       template.file_url,
-      template.id ? `/api/templates/${template.id}/image` : null
+      template.id ? getApiUrl(`/templates/${template.id}/image`) : null
     ].filter(Boolean);
 
     const tryLoadImage = (urlIndex, useAnonymous) => {
@@ -251,7 +251,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
 
   const downloadSampleDoc = () => {
     if (!template?.id) return;
-    window.open(`/api/templates/${template.id}/sample-pdf`, '_blank');
+    window.open(getApiUrl(`/templates/${template.id}/sample-pdf`), '_blank');
     toast.success('Downloading sample verification certificate...');
   };
 

@@ -8,7 +8,7 @@ import { Dialog } from 'primereact/dialog';
 import { Divider } from 'primereact/divider';
 import { UserCheck, Mail, Send, CheckCircle, ExternalLink, Download, Share2, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import api from '../services/api';
+import api, { getApiUrl } from '../services/api';
 
 export default function SingleIssue() {
   const [templates, setTemplates] = useState([]);
@@ -294,7 +294,7 @@ export default function SingleIssue() {
             {/* Action Buttons */}
             <div className="flex flex-column gap-2 mt-3">
               <a
-                href={`/api/public/certificates/${issuedCert.unique_code}/download`}
+                href={getApiUrl(`/public/certificates/${issuedCert.unique_code}/download`)}
                 target="_blank"
                 rel="noreferrer"
                 className="p-button p-button-primary p-button-lg w-full no-underline flex justify-content-center align-items-center gap-2 font-bold text-sm"

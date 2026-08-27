@@ -4,9 +4,10 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Tag } from 'primereact/tag';
-import { Search, Award, Download, ExternalLink, QrCode, Camera, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Search, QrCode, Download, ExternalLink, Award, CheckCircle2, ShieldCheck, Mail, Camera, AlertCircle } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import axios from 'axios';
+import { getApiUrl } from '../services/api';
 
 export default function RecipientPortal() {
   const [query, setQuery] = useState('');
@@ -27,7 +28,7 @@ export default function RecipientPortal() {
     setSearched(true);
     try {
       const isEmail = query.includes('@');
-      const res = await axios.get('/api/public/lookup', {
+      const res = await axios.get(getApiUrl('/public/lookup'), {
         params: isEmail ? { email: query.trim() } : { code: query.trim() }
       });
       setResults(res.data.certificates || []);
@@ -207,7 +208,7 @@ export default function RecipientPortal() {
                     <ExternalLink size={13} className="mr-1" /> View & Verify
                   </a>
                   <a
-                    href={`/api/public/certificates/${cert.unique_code}/download`}
+                    href={getApiUrl(`/public/certificates/${cert.unique_code}/download`)}
                     target="_blank"
                     rel="noreferrer"
                     className="p-button p-button-primary p-button-sm no-underline font-bold text-xs"
