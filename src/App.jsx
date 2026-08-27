@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { ConfirmDialog } from 'primereact/confirmdialog';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import AdminLogin from './pages/AdminLogin';
@@ -114,6 +115,9 @@ function AppRoutes() {
 
       {/* Global AI RAG Chatbot Copilot */}
       <AiChatbot />
+
+      {/* Global Single ConfirmDialog Instance */}
+      <ConfirmDialog />
     </div>
   );
 }

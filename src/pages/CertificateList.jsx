@@ -6,7 +6,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { Tag } from 'primereact/tag';
 import { Dialog } from 'primereact/dialog';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 import toast from 'react-hot-toast';
 import { ShieldCheck, Search, Download, QrCode, Mail, Ban, CheckCircle2, Copy, ExternalLink, Activity } from 'lucide-react';
 import api from '../services/api';
@@ -432,8 +432,6 @@ export default function CertificateList() {
         </div>
       </Dialog>
 
-      {/* Confirmation Modal Component */}
-      <ConfirmDialog />
     </div>
   );
 }

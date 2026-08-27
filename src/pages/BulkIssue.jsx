@@ -7,7 +7,7 @@ import { Column } from 'primereact/column';
 import { ProgressBar } from 'primereact/progressbar';
 import { Tag } from 'primereact/tag';
 import { Dialog } from 'primereact/dialog';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 import toast from 'react-hot-toast';
 import { InputSwitch } from 'primereact/inputswitch';
 import { FileUpload } from 'primereact/fileupload';
@@ -394,9 +394,6 @@ export default function BulkIssue() {
           </DataTable>
         </div>
       )}
-
-      {/* Confirmation Modal Component */}
-      <ConfirmDialog />
     </div>
   );
 }

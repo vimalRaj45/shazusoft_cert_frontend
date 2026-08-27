@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from 'primereact/button';
 import { Sidebar } from 'primereact/sidebar';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 import {
   Layers,
   UserCheck,
@@ -244,8 +244,6 @@ export default function Navbar() {
         </div>
       </Sidebar>
 
-      {/* Confirmation Modal Component */}
-      <ConfirmDialog />
     </header>
   );
 }

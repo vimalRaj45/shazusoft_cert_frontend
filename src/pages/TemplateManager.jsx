@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 import { InputText } from 'primereact/inputtext';
 import toast from 'react-hot-toast';
 import { FileUpload } from 'primereact/fileupload';
@@ -306,8 +306,6 @@ export default function TemplateManager() {
         </form>
       </Dialog>
 
-      {/* Confirmation Modal Component */}
-      <ConfirmDialog />
     </div>
   );
 }
