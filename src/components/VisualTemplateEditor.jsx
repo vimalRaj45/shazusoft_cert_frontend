@@ -22,6 +22,7 @@ const FONT_FAMILIES = [
   { label: 'Pinyon Script (Royal English Script)', value: 'Pinyon Script' },
   { label: 'Alex Brush (Signature Script)', value: 'Alex Brush' },
   { label: 'Outfit (Modern Clean Brand)', value: 'Outfit' },
+  { label: 'Be Vietnam Pro (Modern Geometric Sans)', value: 'Be Vietnam Pro' },
   { label: 'Inter (Clean Minimal)', value: 'Inter' },
   { label: 'Standard Serif', value: 'serif' },
   { label: 'Standard Sans', value: 'sans-serif' }
