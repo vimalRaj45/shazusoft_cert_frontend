@@ -53,7 +53,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
   const [bgImage, setBgImage] = useState(null);
   const [saving, setSaving] = useState(false);
   const [analyzingAi, setAnalyzingAi] = useState(false);
-  const [stageDimensions, setStageDimensions] = useState({ width: 854, height: 480 }); // 16:9 preview
+  const [stageDimensions, setStageDimensions] = useState({ width: 848, height: 600 }); // A4 Landscape (29.7cm x 21cm) preview
   const containerRef = useRef(null);
 
   // Template original dimensions (Default 29.7cm x 21cm A4 Landscape: 2970x2100)

@@ -284,7 +284,7 @@ export default function TemplateManager() {
               className="w-full"
             />
             <small className="text-500 block mt-1.5" style={{ fontSize: '11px' }}>
-              Recommended standard resolution: 1920×1080px (16:9 Landscape)
+              Recommended standard size: <strong>29.7cm × 21cm</strong> (A4 Landscape Aspect Ratio)
             </small>
           </div>
 
