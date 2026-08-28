@@ -63,6 +63,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
         font_family: f.font_family || 'Cinzel',
         font_weight: f.font_weight || 'normal',
         align: f.align || 'center',
+        opacity: f.opacity !== undefined && f.opacity !== null ? parseFloat(f.opacity) : 1.0,
         is_required: f.is_required !== undefined ? f.is_required : true,
         is_qr: f.is_qr || f.field_key === 'qr_code'
       })));
@@ -70,11 +71,11 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
     } else {
       // Default starter fields with high contrast dark font defaults
       const defaults = [
-        { id: 'f1', field_key: 'recipient_name', label: 'Recipient Name', x: 50, y: 36, font_size: 42, font_weight: 'bold', font_color: '#123B32', font_family: 'Cinzel', align: 'center', is_required: true, is_qr: false },
-        { id: 'f2', field_key: 'course_title', label: 'Course / Achievement', x: 50, y: 48, font_size: 26, font_weight: 'bold', font_color: '#C47D4C', font_family: 'Cinzel', align: 'center', is_required: true, is_qr: false },
-        { id: 'f3', field_key: 'issue_date', label: 'Issue Date', x: 28, y: 80, font_size: 18, font_weight: 'normal', font_color: '#334E43', font_family: 'Inter', align: 'center', is_required: true, is_qr: false },
-        { id: 'f4', field_key: 'unique_code', label: 'Certificate ID', x: 50, y: 90, font_size: 14, font_weight: 'normal', font_color: '#527A68', font_family: 'Inter', align: 'center', is_required: true, is_qr: false },
-        { id: 'f5', field_key: 'qr_code', label: 'Verification QR', x: 80, y: 80, font_size: 32, font_weight: 'normal', font_color: '#0f172a', font_family: 'Inter', align: 'center', is_required: false, is_qr: true }
+        { id: 'f1', field_key: 'recipient_name', label: 'Recipient Name', x: 50, y: 36, font_size: 42, font_weight: 'bold', font_color: '#123B32', font_family: 'Cinzel', align: 'center', opacity: 1.0, is_required: true, is_qr: false },
+        { id: 'f2', field_key: 'course_title', label: 'Course / Achievement', x: 50, y: 48, font_size: 26, font_weight: 'bold', font_color: '#C47D4C', font_family: 'Cinzel', align: 'center', opacity: 1.0, is_required: true, is_qr: false },
+        { id: 'f3', field_key: 'issue_date', label: 'Issue Date', x: 28, y: 80, font_size: 18, font_weight: 'normal', font_color: '#334E43', font_family: 'Inter', align: 'center', opacity: 1.0, is_required: true, is_qr: false },
+        { id: 'f4', field_key: 'unique_code', label: 'Certificate ID', x: 50, y: 90, font_size: 14, font_weight: 'normal', font_color: '#527A68', font_family: 'Inter', align: 'center', opacity: 1.0, is_required: true, is_qr: false },
+        { id: 'f5', field_key: 'qr_code', label: 'Verification QR', x: 80, y: 80, font_size: 32, font_weight: 'normal', font_color: '#0f172a', font_family: 'Inter', align: 'center', opacity: 1.0, is_required: false, is_qr: true }
       ];
       setFields(defaults);
       setSelectedFieldId('f1');
@@ -189,6 +190,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
       font_weight: 'normal',
       font_color: '#ffffff',
       align: 'center',
+      opacity: 1.0,
       is_required: false,
       is_qr: false
     };
@@ -226,6 +228,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
           font_color: af.color || primary_color || '#123B32',
           font_weight: af.field_name === 'recipient_name' ? 'bold' : 'normal',
           align: af.align || 'center',
+          opacity: 1.0,
           is_required: af.field_name !== 'qr_code',
           is_qr: af.is_qr || af.field_name === 'qr_code'
         }));
@@ -385,6 +388,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                         key={f.id}
                         x={posX}
                         y={posY}
+                        opacity={f.opacity !== undefined && f.opacity !== null ? parseFloat(f.opacity) : 1.0}
                         draggable
                         onDragEnd={(e) => handleDragEnd(f.id, e)}
                         onClick={() => setSelectedFieldId(f.id)}
@@ -423,6 +427,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                       key={f.id}
                       x={posX}
                       y={posY}
+                      opacity={f.opacity !== undefined && f.opacity !== null ? parseFloat(f.opacity) : 1.0}
                       draggable
                       onDragEnd={(e) => handleDragEnd(f.id, e)}
                       onClick={() => setSelectedFieldId(f.id)}
@@ -673,6 +678,53 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                   </div>
                 </>
               )}
+
+              {/* Opacity Control */}
+              <div className="p-2 surface-50 border-round border-1 border-200">
+                <div className="flex align-items-center justify-content-between mb-1.5">
+                  <label className="text-xs font-semibold text-700 flex align-items-center gap-1">
+                    Text / Field Opacity: <strong>{Math.round((selectedField.opacity ?? 1.0) * 100)}%</strong>
+                  </label>
+                  <div className="flex gap-1">
+                    {[100, 80, 60, 40, 20].map((pct) => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => updateSelectedField('opacity', pct / 100)}
+                        className={`px-1.5 py-0.5 text-xs border-round border-1 cursor-pointer transition-all ${
+                          Math.round((selectedField.opacity ?? 1.0) * 100) === pct
+                            ? 'bg-indigo-600 text-white border-indigo-600 font-bold'
+                            : 'surface-0 text-700 border-300 hover:surface-200'
+                        }`}
+                        style={{ fontSize: '10px' }}
+                      >
+                        {pct}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex align-items-center gap-2">
+                  <input
+                    type="range"
+                    min="5"
+                    max="100"
+                    step="5"
+                    value={Math.round((selectedField.opacity ?? 1.0) * 100)}
+                    onChange={(e) => updateSelectedField('opacity', parseInt(e.target.value, 10) / 100)}
+                    className="w-full cursor-pointer"
+                    style={{ accentColor: '#123B32', height: '6px' }}
+                  />
+                  <InputNumber
+                    value={Math.round((selectedField.opacity ?? 1.0) * 100)}
+                    onValueChange={(e) => updateSelectedField('opacity', (e.value ?? 100) / 100)}
+                    min={5}
+                    max={100}
+                    suffix="%"
+                    className="w-5rem"
+                    inputClassName="p-inputtext-sm text-center font-bold"
+                  />
+                </div>
+              </div>
 
               {/* Is Required Toggle */}
               <div className="flex align-items-center justify-content-between p-2 surface-50 border-round">
