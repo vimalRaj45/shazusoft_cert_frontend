@@ -208,20 +208,98 @@ export default function SingleIssue() {
                 Live Issuance Summary
               </h4>
 
+              {/* Clean Live Certificate Preview Container (No Dark Overlay) */}
               <div
-                className="w-full border-round-xl p-4 mb-3 text-center relative overflow-hidden shadow-2"
+                className="w-full border-round-xl mb-3 relative overflow-hidden shadow-2 flex justify-content-center align-items-center surface-900"
                 style={{
-                  minHeight: '200px',
-                  background: currentTemplate?.file_url ? `url(${currentTemplate.file_url}) center/cover no-repeat` : 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+                  minHeight: '230px',
+                  aspectRatio: '1.414/1',
                   border: '1.5px solid #D3DDD7'
                 }}
               >
-                <div className="bg-black-alpha-70 border-round-lg p-3 text-white">
-                  <div className="text-xs text-amber-400 font-bold uppercase tracking-widest mb-1">CERTIFICATE PREVIEW</div>
-                  <h3 className="text-lg font-bold text-white m-0 mb-1">{recipientName || 'Recipient Full Name'}</h3>
-                  <div className="text-amber-300 text-sm font-semibold mb-3">{fieldData.course_title || currentTemplate?.name || 'Certificate of Achievement'}</div>
-                  <div className="text-xs text-300">ID: Generated automatically on issuance</div>
-                </div>
+                {currentTemplate?.file_url ? (
+                  <div className="relative w-full h-full">
+                    {/* Real Certificate Artwork Background */}
+                    <img
+                      src={currentTemplate.file_url}
+                      alt={currentTemplate.name}
+                      className="w-full h-full object-contain block"
+                    />
+                    
+                    {/* Live Positioned Overlay Fields */}
+                    {templateFields && templateFields.length > 0 ? (
+                      templateFields.map((f) => {
+                        let textVal = '';
+                        if (f.field_key === 'recipient_name') textVal = recipientName || 'Recipient Full Name';
+                        else if (f.field_key === 'unique_code' || f.field_key === 'certificate_id') textVal = 'CERT-2026-XXXXXX';
+                        else if (f.field_key === 'issue_date' || f.field_key === 'date') textVal = fieldData[f.field_key] || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                        else textVal = fieldData[f.field_key] !== undefined && fieldData[f.field_key] !== '' ? String(fieldData[f.field_key]) : (f.label || '');
+
+                        if (f.is_qr) {
+                          const baseSize = parseInt(f.font_size, 10) || 32;
+                          const qrSize = Math.max(24, Math.round(baseSize * 0.9));
+                          return (
+                            <div
+                              key={f.id}
+                              className="absolute flex align-items-center justify-content-center border-round font-bold shadow-1"
+                              style={{
+                                left: `${f.x}%`,
+                                top: `${f.y}%`,
+                                transform: 'translate(-50%, -50%)',
+                                width: `${qrSize}px`,
+                                height: `${qrSize}px`,
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                color: f.font_color || '#123B32',
+                                border: '1px solid rgba(0, 0, 0, 0.2)',
+                                fontSize: '8px',
+                                opacity: f.opacity !== undefined && f.opacity !== null ? parseFloat(f.opacity) : 1
+                              }}
+                              title="Anti-Tamper QR Code"
+                            >
+                              QR
+                            </div>
+                          );
+                        }
+
+                        // Text Field
+                        const scaledFontSize = Math.max(9, Math.round((parseInt(f.font_size, 10) || 28) * 0.32));
+                        return (
+                          <div
+                            key={f.id}
+                            className="absolute whitespace-nowrap text-shadow-sm pointer-events-none"
+                            style={{
+                              left: `${f.x}%`,
+                              top: `${f.y}%`,
+                              transform: 'translate(-50%, -50%)',
+                              fontFamily: (f.font_family || 'Cinzel').split(',')[0],
+                              fontSize: `${scaledFontSize}px`,
+                              fontWeight: f.font_weight === 'bold' ? 'bold' : 'normal',
+                              color: f.font_color || '#123B32',
+                              textAlign: f.align || 'center',
+                              opacity: f.opacity !== undefined && f.opacity !== null ? parseFloat(f.opacity) : 1
+                            }}
+                          >
+                            {textVal}
+                          </div>
+                        );
+                      })
+                    ) : (
+                      // Fallback clean light badge overlay if no fields saved yet
+                      <div className="absolute bottom-0 left-0 w-full p-2 text-center surface-0-alpha-90 border-top-1 border-200">
+                        <h4 className="text-sm font-bold text-900 m-0">{recipientName || 'Recipient Full Name'}</h4>
+                        <div className="text-xs font-semibold text-indigo-700">{fieldData.course_title || currentTemplate.name}</div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  // Built-in Default Background Preview
+                  <div className="w-full h-full p-4 flex flex-column justify-content-center align-items-center text-center text-white" style={{ background: 'linear-gradient(135deg, #123B32 0%, #2F5B4E 100%)' }}>
+                    <div className="text-xs text-amber-400 font-bold uppercase tracking-widest mb-1">CERTIFICATE OF ACHIEVEMENT</div>
+                    <h3 className="text-lg font-bold text-white m-0 mb-1">{recipientName || 'Recipient Full Name'}</h3>
+                    <div className="text-amber-300 text-sm font-semibold mb-2">{fieldData.course_title || 'Certificate of Achievement'}</div>
+                    <div className="text-xs text-400">ID: Generated automatically on issuance</div>
+                  </div>
+                )}
               </div>
 
               <div className="text-xs text-600 flex flex-column gap-1 surface-50 p-3 border-round-lg border-1 border-200">
