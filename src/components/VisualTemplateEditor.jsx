@@ -9,7 +9,7 @@ import { Card } from 'primereact/card';
 import { Divider } from 'primereact/divider';
 import { ColorPicker } from 'primereact/colorpicker';
 import toast from 'react-hot-toast';
-import { Move, Type, QrCode, Plus, Trash2, Save, Eye, RefreshCw, Sparkles, Wand2, Download } from 'lucide-react';
+import { Move, Type, QrCode, Plus, Trash2, Save, Eye, RefreshCw, Sparkles, Wand2, Download, Pipette, Palette } from 'lucide-react';
 import api, { getApiUrl } from '../services/api';
 
 const FONT_FAMILIES = [
@@ -32,6 +32,19 @@ const ALIGN_OPTIONS = [
   { label: 'Left', value: 'left' },
   { label: 'Center', value: 'center' },
   { label: 'Right', value: 'right' }
+];
+
+const PRESET_COLORS = [
+  { name: 'Deep Emerald', hex: '#123B32' },
+  { name: 'Shazu Green', hex: '#2E7D32' },
+  { name: 'Royal Navy', hex: '#0F2C59' },
+  { name: 'Classic Gold', hex: '#C47D4C' },
+  { name: 'Bright Gold', hex: '#D4AF37' },
+  { name: 'Burgundy', hex: '#8B0000' },
+  { name: 'Charcoal', hex: '#1A1A1A' },
+  { name: 'Slate Gray', hex: '#475569' },
+  { name: 'Pure White', hex: '#FFFFFF' },
+  { name: 'Obsidian', hex: '#000000' }
 ];
 
 export default function VisualTemplateEditor({ template, initialFields = [], onSaveSuccess }) {
@@ -161,6 +174,23 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
     setFields((prev) =>
       prev.map((f) => (f.id === selectedFieldId ? { ...f, [key]: value } : f))
     );
+  };
+
+  const handlePickColorFromScreen = async () => {
+    if (!window.EyeDropper) {
+      toast.error('Eyedropper is supported in Chrome, Edge & Brave browsers.');
+      return;
+    }
+    try {
+      const eyeDropper = new window.EyeDropper();
+      const result = await eyeDropper.open();
+      if (result?.sRGBHex) {
+        updateSelectedField('font_color', result.sRGBHex);
+        toast.success(`Picked color: ${result.sRGBHex}`);
+      }
+    } catch (e) {
+      // Eyedropper cancelled by user
+    }
   };
 
   const handleDragEnd = (fieldId, e) => {
@@ -572,41 +602,23 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
               </div>
 
               {selectedField.is_qr ? (
-                <>
-                  <div className="grid">
-                    <div className="col-12">
-                      <label className="text-xs font-semibold text-700 block mb-1">QR Code Scale / Size</label>
-                      <InputNumber
-                        value={selectedField.font_size || 32}
-                        onValueChange={(e) => updateSelectedField('font_size', e.value)}
-                        min={20}
-                        max={80}
-                        suffix=" scale"
-                        className="w-full"
-                        inputClassName="p-inputtext-sm w-full"
-                      />
-                      <small className="text-500 block mt-1 text-xs">
-                        Adjust scale from 25 (compact) to 45+ (prominent & crisp).
-                      </small>
-                    </div>
+                <div className="grid">
+                  <div className="col-12">
+                    <label className="text-xs font-semibold text-700 block mb-1">QR Code Scale / Size</label>
+                    <InputNumber
+                      value={selectedField.font_size || 32}
+                      onValueChange={(e) => updateSelectedField('font_size', e.value)}
+                      min={20}
+                      max={80}
+                      suffix=" scale"
+                      className="w-full"
+                      inputClassName="p-inputtext-sm w-full"
+                    />
+                    <small className="text-500 block mt-1 text-xs">
+                      Adjust scale from 25 (compact) to 45+ (prominent & crisp).
+                    </small>
                   </div>
-                  <div>
-                    <label className="text-xs font-semibold text-700 block mb-1">QR Code Dark Color</label>
-                    <div className="flex align-items-center gap-2">
-                      <input
-                        type="color"
-                        value={selectedField.font_color || '#0f172a'}
-                        onChange={(e) => updateSelectedField('font_color', e.target.value)}
-                        style={{ width: '38px', height: '38px', padding: 0, border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer' }}
-                      />
-                      <InputText
-                        value={selectedField.font_color || '#0f172a'}
-                        onChange={(e) => updateSelectedField('font_color', e.target.value)}
-                        className="w-full p-inputtext-sm font-monospace text-xs"
-                      />
-                    </div>
-                  </div>
-                </>
+                </div>
               ) : (
                 <>
                   {/* Font Size & Weight */}
@@ -637,21 +649,19 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                     </div>
                   </div>
 
-                  {/* Font Family */}
-                  <div>
-                    <label className="text-xs font-semibold text-700 block mb-1">Font Family</label>
-                    <Dropdown
-                      value={selectedField.font_family}
-                      options={FONT_FAMILIES}
-                      onChange={(e) => updateSelectedField('font_family', e.value)}
-                      className="w-full p-inputtext-sm"
-                    />
-                  </div>
-
-                  {/* Alignment & Color */}
+                  {/* Font Family & Alignment */}
                   <div className="grid">
-                    <div className="col-6">
-                      <label className="text-xs font-semibold text-700 block mb-1">Text Alignment</label>
+                    <div className="col-7">
+                      <label className="text-xs font-semibold text-700 block mb-1">Font Family</label>
+                      <Dropdown
+                        value={selectedField.font_family}
+                        options={FONT_FAMILIES}
+                        onChange={(e) => updateSelectedField('font_family', e.value)}
+                        className="w-full p-inputtext-sm"
+                      />
+                    </div>
+                    <div className="col-5">
+                      <label className="text-xs font-semibold text-700 block mb-1">Alignment</label>
                       <Dropdown
                         value={selectedField.align}
                         options={ALIGN_OPTIONS}
@@ -659,25 +669,83 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                         className="w-full p-inputtext-sm"
                       />
                     </div>
-                    <div className="col-6">
-                      <label className="text-xs font-semibold text-700 block mb-1">Font Color</label>
-                      <div className="flex align-items-center gap-2">
-                        <input
-                          type="color"
-                          value={selectedField.font_color || '#123B32'}
-                          onChange={(e) => updateSelectedField('font_color', e.target.value)}
-                          style={{ width: '38px', height: '38px', padding: 0, border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer' }}
-                        />
-                        <InputText
-                          value={selectedField.font_color}
-                          onChange={(e) => updateSelectedField('font_color', e.target.value)}
-                          className="w-full p-inputtext-sm font-monospace text-xs"
-                        />
-                      </div>
-                    </div>
                   </div>
                 </>
               )}
+
+              {/* Enhanced Color Code Picker & Eyedropper Tool */}
+              <div className="p-3 surface-50 border-round border-1 border-200">
+                <div className="flex align-items-center justify-content-between mb-2">
+                  <label className="text-xs font-bold text-800 flex align-items-center gap-1.5">
+                    <Palette size={15} style={{ color: '#123B32' }} />
+                    {selectedField.is_qr ? 'QR Code Color' : 'Font / Text Color'}
+                  </label>
+                  {window.EyeDropper && (
+                    <button
+                      type="button"
+                      onClick={handlePickColorFromScreen}
+                      className="p-button p-button-outlined p-button-sm px-2 py-1 flex align-items-center gap-1 text-xs font-semibold cursor-pointer border-round transition-all"
+                      style={{ color: '#123B32', borderColor: '#123B32', background: '#FFFFFF' }}
+                      title="Click to pick exact color directly from your certificate image"
+                    >
+                      <Pipette size={14} />
+                      Pick from Certificate
+                    </button>
+                  )}
+                </div>
+
+                {/* Main Color Picker Box & Hex Input */}
+                <div className="flex align-items-center gap-2 mb-2.5">
+                  <input
+                    type="color"
+                    value={selectedField.font_color || '#123B32'}
+                    onChange={(e) => updateSelectedField('font_color', e.target.value)}
+                    className="cursor-pointer border-1 border-300 border-round shadow-1"
+                    style={{ width: '46px', height: '40px', padding: '2px', background: '#fff' }}
+                    title="Choose custom color wheel"
+                  />
+                  <div className="flex-1">
+                    <InputText
+                      value={selectedField.font_color || '#123B32'}
+                      onChange={(e) => updateSelectedField('font_color', e.target.value)}
+                      className="w-full p-inputtext-sm font-monospace text-xs font-bold"
+                      placeholder="#123B32"
+                    />
+                  </div>
+                  <div
+                    className="w-2.5rem h-2.5rem border-round border-1 border-300 shadow-1 flex align-items-center justify-content-center text-xs font-bold"
+                    style={{
+                      backgroundColor: selectedField.font_color || '#123B32',
+                      color: ['#ffffff', '#fff', 'white'].includes((selectedField.font_color || '').toLowerCase()) ? '#000' : '#fff'
+                    }}
+                    title="Current active color preview"
+                  >
+                    {selectedField.is_qr ? 'QR' : 'Aa'}
+                  </div>
+                </div>
+
+                {/* Certificate Palette Swatches */}
+                <div>
+                  <label className="text-xs font-semibold text-600 block mb-1">Preset Certificate Colors:</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRESET_COLORS.map((c) => (
+                      <button
+                        key={c.hex}
+                        type="button"
+                        onClick={() => updateSelectedField('font_color', c.hex)}
+                        title={`${c.name} (${c.hex})`}
+                        className="w-1.75rem h-1.75rem border-round border-1 cursor-pointer transition-all hover:scale-110 shadow-1"
+                        style={{
+                          backgroundColor: c.hex,
+                          borderColor: (selectedField.font_color || '').toLowerCase() === c.hex.toLowerCase() ? '#4f46e5' : 'rgba(0,0,0,0.2)',
+                          transform: (selectedField.font_color || '').toLowerCase() === c.hex.toLowerCase() ? 'scale(1.15)' : 'scale(1)',
+                          boxShadow: (selectedField.font_color || '').toLowerCase() === c.hex.toLowerCase() ? '0 0 0 2px #4f46e5' : 'none'
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
 
               {/* Opacity Control */}
               <div className="p-2 surface-50 border-round border-1 border-200">
