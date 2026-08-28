@@ -56,9 +56,9 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
   const [stageDimensions, setStageDimensions] = useState({ width: 854, height: 480 }); // 16:9 preview
   const containerRef = useRef(null);
 
-  // Template original dimensions
-  const origWidth = template?.width_px || 1920;
-  const origHeight = template?.height_px || 1080;
+  // Template original dimensions (Default 29.7cm x 21cm A4 Landscape: 2970x2100)
+  const origWidth = template?.width_px || bgImage?.naturalWidth || 2970;
+  const origHeight = template?.height_px || bgImage?.naturalHeight || 2100;
 
   // Scale ratio between original image and preview canvas
   const scale = stageDimensions.width / origWidth;
