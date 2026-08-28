@@ -9,7 +9,7 @@ import { Card } from 'primereact/card';
 import { Divider } from 'primereact/divider';
 import { ColorPicker } from 'primereact/colorpicker';
 import toast from 'react-hot-toast';
-import { Move, Type, QrCode, Plus, Trash2, Save, Eye, RefreshCw, Sparkles, Wand2, Download, Pipette, Palette } from 'lucide-react';
+import { Move, Type, QrCode, Plus, Trash2, Save, Eye, RefreshCw, Sparkles, Wand2, Download, Pipette, Palette, Underline } from 'lucide-react';
 import api, { getApiUrl } from '../services/api';
 
 const FONT_FAMILIES = [
@@ -484,6 +484,7 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                         fontSize={previewFontSize}
                         fontFamily={f.font_family || 'sans-serif'}
                         fontStyle={f.font_weight === 'bold' ? 'bold' : 'normal'}
+                        textDecoration={f.is_underline ? 'underline' : ''}
                         fill={f.font_color || '#ffffff'}
                         shadowColor={isSelected ? '#4f46e5' : '#000000'}
                         shadowBlur={isSelected ? 6 : 0}
@@ -669,6 +670,17 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                         className="w-full p-inputtext-sm"
                       />
                     </div>
+                  </div>
+                  {/* Underline Text Toggle */}
+                  <div className="flex align-items-center justify-content-between p-2 surface-50 border-round my-2">
+                    <span className="text-xs font-semibold text-800 flex align-items-center gap-1.5">
+                      <Underline size={15} style={{ color: '#123B32' }} />
+                      Underline Text
+                    </span>
+                    <InputSwitch
+                      checked={selectedField.is_underline || false}
+                      onChange={(e) => updateSelectedField('is_underline', e.value)}
+                    />
                   </div>
                 </>
               )}

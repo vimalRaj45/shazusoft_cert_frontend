@@ -276,6 +276,7 @@ export default function SingleIssue() {
                               fontWeight: f.font_weight === 'bold' ? 'bold' : 'normal',
                               color: f.font_color || '#123B32',
                               textAlign: f.align || 'center',
+                              textDecoration: f.is_underline ? 'underline' : 'none',
                               opacity: f.opacity !== undefined && f.opacity !== null ? parseFloat(f.opacity) : 1
                             }}
                           >
