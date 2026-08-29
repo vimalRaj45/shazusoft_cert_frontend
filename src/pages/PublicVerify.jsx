@@ -30,10 +30,22 @@ export default function PublicVerify() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [turnstileVerified, setTurnstileVerified] = useState(false);
 
   useEffect(() => {
     fetchVerification();
   }, [code]);
+
+  const handleTurnstileVerify = (token) => {
+    setTurnstileVerified(true);
+    if (certData?.valid) {
+      confetti({
+        particleCount: 75,
+        spread: 80,
+        origin: { y: 0.5 }
+      });
+    }
+  };
 
   const fetchVerification = async () => {
     setLoading(true);
@@ -41,14 +53,7 @@ export default function PublicVerify() {
     try {
       const res = await axios.get(getApiUrl(`/public/verify/${code}`));
       setCertData(res.data);
-
-      if (res.data?.valid) {
-        confetti({
-          particleCount: 60,
-          spread: 70,
-          origin: { y: 0.5 }
-        });
-      } else if (res.data && !res.data.valid) {
+      if (res.data && !res.data.valid) {
         setError(res.data.message || 'This credential is no longer valid.');
       }
     } catch (err) {
@@ -198,193 +203,212 @@ export default function PublicVerify() {
           </p>
         </div>
 
-        {/* Main Certificate Verification Card */}
-        <div className="border-round-2xl shadow-3 overflow-hidden mb-4" style={{ background: '#FFFFFF', border: '1.5px solid #D3DDD7' }}>
-          
-          {/* Status Header Banner */}
-          <div
-            className="p-4 text-white flex flex-column sm:flex-row align-items-center justify-content-between gap-3"
-            style={{
-              background: isRevoked
-                ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
-                : 'linear-gradient(135deg, #123B32 0%, #2F5B4E 100%)'
-            }}
-          >
-            <div className="flex align-items-center gap-3">
-              <div className="bg-white-alpha-20 border-round-full p-2 flex align-items-center justify-content-center" style={{ width: '48px', height: '48px' }}>
-                {isRevoked ? <ShieldAlert size={28} /> : <ShieldCheck size={28} />}
-              </div>
-              <div>
-                <h2 className="text-xl font-bold m-0 text-white">
-                  {isRevoked ? 'Certificate Revoked' : 'Verified Authentic Credential'}
-                </h2>
-                <p className="text-xs text-white-alpha-90 m-0 mt-1">
-                  {isRevoked
-                    ? 'This certificate has been revoked by the issuing organization.'
-                    : 'Cryptographically registered and authenticated in the Official Verification Registry.'}
-                </p>
-              </div>
+        {/* Security Gate or Verified Content */}
+        {!turnstileVerified ? (
+          <div className="border-round-2xl shadow-3 p-5 text-center my-4" style={{ background: '#FFFFFF', border: '1.5px solid #D3DDD7' }}>
+            <div className="inline-flex align-items-center justify-content-center border-round-full p-3 mb-3" style={{ background: '#E8EFEB', color: '#123B32' }}>
+              <Lock size={32} />
             </div>
-
-            <div className="bg-white-alpha-20 px-3 py-2 border-round-lg text-xs font-bold flex align-items-center gap-2 text-white">
-              <Eye size={15} />
-              <span>{certificate.verified_count} Verifications</span>
-            </div>
+            <h2 className="font-bold text-xl md:text-2xl m-0 mb-2" style={{ color: '#123B32' }}>
+              Security Verification Required
+            </h2>
+            <p className="text-xs md:text-sm font-semibold mb-4" style={{ color: '#527A68', maxWidth: '480px', margin: '0 auto 1.5rem auto' }}>
+              Please complete the Cloudflare Turnstile security check below to verify and view official certificate credentials.
+            </p>
+            <TurnstileWidget onVerify={handleTurnstileVerify} />
           </div>
-
-          {/* Body Section */}
-          <div className="p-4 md:p-5" style={{ background: '#ffffff' }}>
-            <div className="mb-4">
-              <span className="badge-source mb-2 inline-block">Recipient</span>
-              <h2 className="text-900 font-bold text-3xl m-0 mb-1" style={{ letterSpacing: '-0.5px', color: '#123B32' }}>
-                {certificate.recipient_name}
-              </h2>
-              <p className="font-bold text-lg m-0" style={{ color: '#C47D4C' }}>
-                {certificate.course_title}
-              </p>
-            </div>
-
-            {/* Metadata Box - Clean Full Width Grid */}
-            <div className="surface-50 border-round-xl p-4 border-1 border-200 mb-4">
-              <div className="grid text-sm">
-                <div className="col-12 sm:col-4 mb-2">
-                  <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1.5" style={{ color: '#527A68' }}>
-                    <Building size={15} style={{ color: '#123B32' }} /> Issuing Organization
-                  </span>
-                  <strong className="text-900 font-bold text-base" style={{ color: '#123B32' }}>
-                    {certificate.issuer || 'Shazu Soft Technologies'}
-                  </strong>
+        ) : (
+          <>
+            {/* Main Certificate Verification Card */}
+            <div className="border-round-2xl shadow-3 overflow-hidden mb-4" style={{ background: '#FFFFFF', border: '1.5px solid #D3DDD7' }}>
+              
+              {/* Status Header Banner */}
+              <div
+                className="p-4 text-white flex flex-column sm:flex-row align-items-center justify-content-between gap-3"
+                style={{
+                  background: isRevoked
+                    ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
+                    : 'linear-gradient(135deg, #123B32 0%, #2F5B4E 100%)'
+                }}
+              >
+                <div className="flex align-items-center gap-3">
+                  <div className="bg-white-alpha-20 border-round-full p-2 flex align-items-center justify-content-center" style={{ width: '48px', height: '48px' }}>
+                    {isRevoked ? <ShieldAlert size={28} /> : <ShieldCheck size={28} />}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold m-0 text-white">
+                      {isRevoked ? 'Certificate Revoked' : 'Verified Authentic Credential'}
+                    </h2>
+                    <p className="text-xs text-white-alpha-90 m-0 mt-1">
+                      {isRevoked
+                        ? 'This certificate has been revoked by the issuing organization.'
+                        : 'Cryptographically registered and authenticated in the Official Verification Registry.'}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="col-12 sm:col-4 mb-2">
-                  <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1.5" style={{ color: '#527A68' }}>
-                    <Calendar size={15} style={{ color: '#123B32' }} /> Issue Date
-                  </span>
-                  <strong className="text-900 font-bold text-base" style={{ color: '#123B32' }}>
-                    {new Date(certificate.issued_at || Date.now()).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </strong>
-                </div>
-
-                <div className="col-12 sm:col-4 mb-2">
-                  <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1.5" style={{ color: '#527A68' }}>
-                    <Hash size={15} style={{ color: '#123B32' }} /> Verification ID
-                  </span>
-                  <span className="font-monospace text-sm bg-white px-3 py-1.5 border-round-lg border-1 border-300 font-bold select-all inline-block shadow-sm" style={{ color: '#123B32' }}>
-                    {certificate.unique_code}
-                  </span>
+                <div className="flex align-items-center gap-2">
+                  <div className="bg-white-alpha-20 px-3 py-1.5 border-round-lg text-xs font-bold flex align-items-center gap-1.5 text-white">
+                    <CheckCircle2 size={14} className="text-emerald-300" />
+                    <span>Turnstile Verified</span>
+                  </div>
+                  <div className="bg-white-alpha-20 px-3 py-1.5 border-round-lg text-xs font-bold flex align-items-center gap-1.5 text-white">
+                    <Eye size={14} />
+                    <span>{certificate.verified_count} Verifications</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Cloudflare Turnstile Anti-Bot Security Verification Widget */}
-            {!isRevoked && (
-              <TurnstileWidget />
-            )}
-
-            {/* Download PDF Button */}
-            {!isRevoked && (
-              <div className="mb-4 text-center">
-                <a
-                  href={getApiUrl(`/public/certificates/${certificate.unique_code}/download`)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-button p-button-primary p-button-lg w-full sm:w-auto px-5 no-underline inline-flex justify-content-center align-items-center gap-2 shadow-2 font-bold py-3 text-base"
-                >
-                  <Download size={20} /> Download Official PDF Certificate
-                </a>
-                <small className="text-500 block text-center mt-2">
-                  Rendered on-demand in high-resolution vector PDF format
-                </small>
-              </div>
-            )}
-
-            {/* Social Share & LinkedIn Section */}
-            {!isRevoked && (
-              <div className="mt-4 pt-4 border-top-1 border-200">
-                <div className="text-center mb-3">
-                  <h3 className="text-900 font-bold text-base m-0 mb-1 flex align-items-center justify-content-center gap-2">
-                    <Share2 size={18} className="text-indigo-600" />
-                    Share & Add to Professional Profile
-                  </h3>
-                  <p className="text-500 text-xs m-0">
-                    Broadcast your authenticated credential to LinkedIn, networks, and employers.
+              {/* Body Section */}
+              <div className="p-4 md:p-5" style={{ background: '#ffffff' }}>
+                <div className="mb-4">
+                  <span className="badge-source mb-2 inline-block">Recipient</span>
+                  <h2 className="text-900 font-bold text-3xl m-0 mb-1" style={{ letterSpacing: '-0.5px', color: '#123B32' }}>
+                    {certificate.recipient_name}
+                  </h2>
+                  <p className="font-bold text-lg m-0" style={{ color: '#C47D4C' }}>
+                    {certificate.course_title}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap justify-content-center gap-2">
-                  {/* LinkedIn Add to Profile */}
-                  <a
-                    href={linkedinAddUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-button btn-share-linkedin no-underline flex align-items-center gap-2 text-sm font-semibold px-4 py-2 border-round-lg shadow-1"
-                  >
-                    <i className="pi pi-linkedin" style={{ fontSize: '1.1rem' }}></i> Add to LinkedIn Profile
-                  </a>
+                {/* Metadata Box - Clean Full Width Grid */}
+                <div className="surface-50 border-round-xl p-4 border-1 border-200 mb-4">
+                  <div className="grid text-sm">
+                    <div className="col-12 sm:col-4 mb-2">
+                      <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1.5" style={{ color: '#527A68' }}>
+                        <Building size={15} style={{ color: '#123B32' }} /> Issuing Organization
+                      </span>
+                      <strong className="text-900 font-bold text-base" style={{ color: '#123B32' }}>
+                        {certificate.issuer || 'Shazu Soft Technologies'}
+                      </strong>
+                    </div>
 
-                  {/* LinkedIn Share */}
-                  <a
-                    href={linkedinShareUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-button p-button-outlined p-button-indigo no-underline flex align-items-center gap-2 text-sm font-semibold px-3 py-2 border-round-lg"
-                  >
-                    <i className="pi pi-linkedin" style={{ fontSize: '1.1rem' }}></i> Share
-                  </a>
+                    <div className="col-12 sm:col-4 mb-2">
+                      <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1.5" style={{ color: '#527A68' }}>
+                        <Calendar size={15} style={{ color: '#123B32' }} /> Issue Date
+                      </span>
+                      <strong className="text-900 font-bold text-base" style={{ color: '#123B32' }}>
+                        {new Date(certificate.issued_at || Date.now()).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </strong>
+                    </div>
 
-                  {/* WhatsApp */}
-                  <a
-                    href={whatsappShareUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-button btn-share-whatsapp no-underline flex align-items-center gap-2 text-sm font-semibold px-3 py-2 border-round-lg text-white"
-                  >
-                    <i className="pi pi-whatsapp" style={{ fontSize: '1.1rem' }}></i> WhatsApp
-                  </a>
+                    <div className="col-12 sm:col-4 mb-2">
+                      <span className="text-500 text-xs font-semibold block mb-1 flex align-items-center gap-1.5" style={{ color: '#527A68' }}>
+                        <Hash size={15} style={{ color: '#123B32' }} /> Verification ID
+                      </span>
+                      <span className="font-monospace text-sm bg-white px-3 py-1.5 border-round-lg border-1 border-300 font-bold select-all inline-block shadow-sm" style={{ color: '#123B32' }}>
+                        {certificate.unique_code}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-                  {/* Twitter / X */}
-                  <a
-                    href={twitterShareUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-button btn-share-x no-underline flex align-items-center gap-2 text-sm font-semibold px-3 py-2 border-round-lg text-white"
-                  >
-                    <i className="pi pi-twitter" style={{ fontSize: '1.1rem' }}></i> Post to X
-                  </a>
+                {/* Download PDF Button */}
+                {!isRevoked && (
+                  <div className="mb-4 text-center">
+                    <a
+                      href={getApiUrl(`/public/certificates/${certificate.unique_code}/download`)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-button p-button-primary p-button-lg w-full sm:w-auto px-5 no-underline inline-flex justify-content-center align-items-center gap-2 shadow-2 font-bold py-3 text-base"
+                    >
+                      <Download size={20} /> Download Official PDF Certificate
+                    </a>
+                    <small className="text-500 block text-center mt-2">
+                      Rendered on-demand in high-resolution vector PDF format
+                    </small>
+                  </div>
+                )}
 
-                  {/* Copy Link */}
-                  <Button
-                    icon={copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
-                    label={copied ? 'Link Copied!' : 'Copy Link'}
-                    className="p-button-outlined p-button-secondary text-sm font-semibold"
-                    onClick={copyLink}
+                {/* Social Share & LinkedIn Section */}
+                {!isRevoked && (
+                  <div className="mt-4 pt-4 border-top-1 border-200">
+                    <div className="text-center mb-3">
+                      <h3 className="text-900 font-bold text-base m-0 mb-1 flex align-items-center justify-content-center gap-2">
+                        <Share2 size={18} className="text-indigo-600" />
+                        Share & Add to Professional Profile
+                      </h3>
+                      <p className="text-500 text-xs m-0">
+                        Broadcast your authenticated credential to LinkedIn, networks, and employers.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap justify-content-center gap-2">
+                      {/* LinkedIn Add to Profile */}
+                      <a
+                        href={linkedinAddUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-button btn-share-linkedin no-underline flex align-items-center gap-2 text-sm font-semibold px-4 py-2 border-round-lg shadow-1"
+                      >
+                        <i className="pi pi-linkedin" style={{ fontSize: '1.1rem' }}></i> Add to LinkedIn Profile
+                      </a>
+
+                      {/* LinkedIn Share */}
+                      <a
+                        href={linkedinShareUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-button p-button-outlined p-button-indigo no-underline flex align-items-center gap-2 text-sm font-semibold px-3 py-2 border-round-lg"
+                      >
+                        <i className="pi pi-linkedin" style={{ fontSize: '1.1rem' }}></i> Share
+                      </a>
+
+                      {/* WhatsApp */}
+                      <a
+                        href={whatsappShareUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-button btn-share-whatsapp no-underline flex align-items-center gap-2 text-sm font-semibold px-3 py-2 border-round-lg text-white"
+                      >
+                        <i className="pi pi-whatsapp" style={{ fontSize: '1.1rem' }}></i> WhatsApp
+                      </a>
+
+                      {/* Twitter / X */}
+                      <a
+                        href={twitterShareUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-button btn-share-x no-underline flex align-items-center gap-2 text-sm font-semibold px-3 py-2 border-round-lg text-white"
+                      >
+                        <i className="pi pi-twitter" style={{ fontSize: '1.1rem' }}></i> Post to X
+                      </a>
+
+                      {/* Copy Link */}
+                      <Button
+                        icon={copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                        label={copied ? 'Link Copied!' : 'Copy Link'}
+                        className="p-button-outlined p-button-secondary text-sm font-semibold"
+                        onClick={copyLink}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Live On-Demand Image Inspection Frame */}
+            {!isRevoked && (
+              <div className="border-round-2xl shadow-3 border-1 border-200 p-4 mb-4" style={{ background: '#ffffff' }}>
+                <h3 className="text-900 font-bold text-lg mb-3 flex align-items-center gap-2">
+                  <Eye size={18} className="text-indigo-600" />
+                  Certificate Visual Inspection
+                </h3>
+                <div className="border-round-xl overflow-hidden border-1 border-300 shadow-2 p-1" style={{ background: '#0f172a' }}>
+                  <img
+                    src={getApiUrl(`/public/certificates/${certificate.unique_code}/preview`)}
+                    alt="Official Certificate"
+                    style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }}
+                    loading="lazy"
                   />
                 </div>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Live On-Demand Image Inspection Frame */}
-        {!isRevoked && (
-          <div className="border-round-2xl shadow-3 border-1 border-200 p-4 mb-4" style={{ background: '#ffffff' }}>
-            <h3 className="text-900 font-bold text-lg mb-3 flex align-items-center gap-2">
-              <Eye size={18} className="text-indigo-600" />
-              Certificate Visual Inspection
-            </h3>
-            <div className="border-round-xl overflow-hidden border-1 border-300 shadow-2 p-1" style={{ background: '#0f172a' }}>
-              <img
-                src={getApiUrl(`/public/certificates/${certificate.unique_code}/preview`)}
-                alt="Official Certificate"
-                style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }}
-                loading="lazy"
-              />
-            </div>
-          </div>
+          </>
         )}
       </div>
     </div>

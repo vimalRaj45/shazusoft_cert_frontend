@@ -17,6 +17,7 @@ export default function RecipientPortal() {
   const [searched, setSearched] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [cameraError, setCameraError] = useState('');
+  const [turnstileVerified, setTurnstileVerified] = useState(false);
   
   const qrScannerRef = useRef(null);
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function RecipientPortal() {
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
     if (!query.trim()) return;
+    if (!turnstileVerified) return;
 
     setLoading(true);
     setSearched(true);
@@ -150,10 +152,11 @@ export default function RecipientPortal() {
             <div className="flex gap-2">
               <Button
                 type="submit"
-                label="Search"
+                label={turnstileVerified ? "Search" : "Verify Security First"}
                 icon={<Search size={16} className="mr-1" />}
                 className="p-button-primary font-bold text-xs"
                 loading={loading}
+                disabled={!turnstileVerified}
               />
               <Button
                 type="button"
@@ -165,7 +168,7 @@ export default function RecipientPortal() {
               />
             </div>
           </form>
-          <TurnstileWidget />
+          <TurnstileWidget onVerify={() => setTurnstileVerified(true)} />
         </div>
 
         {/* Results List */}
