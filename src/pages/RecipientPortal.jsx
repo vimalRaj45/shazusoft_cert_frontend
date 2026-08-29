@@ -8,6 +8,7 @@ import { Search, QrCode, Download, ExternalLink, Award, CheckCircle2, ShieldChec
 import { Html5Qrcode } from 'html5-qrcode';
 import axios from 'axios';
 import { getApiUrl } from '../services/api';
+import TurnstileWidget from '../components/TurnstileWidget';
 
 export default function RecipientPortal() {
   const [query, setQuery] = useState('');
@@ -164,6 +165,7 @@ export default function RecipientPortal() {
               />
             </div>
           </form>
+          <TurnstileWidget />
         </div>
 
         {/* Results List */}

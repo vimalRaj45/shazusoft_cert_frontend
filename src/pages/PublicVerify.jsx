@@ -22,6 +22,7 @@ import {
 import confetti from 'canvas-confetti';
 import axios from 'axios';
 import { getApiUrl } from '../services/api';
+import TurnstileWidget from '../components/TurnstileWidget';
 
 export default function PublicVerify() {
   const { code } = useParams();
@@ -278,6 +279,11 @@ export default function PublicVerify() {
                 </div>
               </div>
             </div>
+
+            {/* Cloudflare Turnstile Anti-Bot Security Verification Widget */}
+            {!isRevoked && (
+              <TurnstileWidget />
+            )}
 
             {/* Download PDF Button */}
             {!isRevoked && (
