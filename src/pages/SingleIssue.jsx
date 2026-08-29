@@ -277,6 +277,7 @@ export default function SingleIssue() {
                               color: f.font_color || '#123B32',
                               textAlign: f.align || 'center',
                               textDecoration: f.is_underline ? 'underline' : 'none',
+                              textUnderlineOffset: f.is_underline ? '0.25em' : 'auto',
                               opacity: f.opacity !== undefined && f.opacity !== null ? parseFloat(f.opacity) : 1
                             }}
                           >
