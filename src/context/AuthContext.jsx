@@ -23,7 +23,10 @@ export const AuthProvider = ({ children }) => {
         })
         .finally(() => setLoading(false));
     } else {
-      setLoading(false);
+      // Ping health endpoint to wake backend up early on initial load
+      api.get('/health')
+        .catch(() => {})
+        .finally(() => setLoading(false));
     }
   }, []);
 

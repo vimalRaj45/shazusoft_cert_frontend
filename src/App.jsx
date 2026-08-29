@@ -14,10 +14,15 @@ import PublicVerify from './pages/PublicVerify';
 import RecipientPortal from './pages/RecipientPortal';
 import AiChatbot from './components/AiChatbot';
 
+import ServerWakeupLoader from './components/ServerWakeupLoader';
+import ServerWakeupBanner from './components/ServerWakeupBanner';
+
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  if (loading) return null;
+  if (loading) {
+    return <ServerWakeupLoader fullScreen={true} message="Authenticating session & waking up server..." />;
+  }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 };
@@ -27,6 +32,7 @@ function AppRoutes() {
 
   return (
     <div className="min-h-screen flex flex-column surface-ground">
+      <ServerWakeupBanner />
       <Navbar />
       <Toaster
         position="top-right"

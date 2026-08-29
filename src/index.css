@@ -739,3 +739,27 @@ h1, h2, h3, h4, h5, h6 {
     padding: 1rem 1.15rem !important;
   }
 }
+
+/* ==========================================================================
+   Server Wakeup & Loading Keyframe Animations
+   ========================================================================== */
+@keyframes fadeInWakeup {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(18, 59, 50, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 25px 8px rgba(18, 59, 50, 0.15);
+  }
+}
+
