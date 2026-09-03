@@ -247,21 +247,28 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
       const { font_family, primary_color, secondary_color, fields: aiFields } = res.data;
 
       if (aiFields && aiFields.length > 0) {
-        const mapped = aiFields.map((af, idx) => ({
-          id: `ai_field_${idx}_${Date.now()}`,
-          field_key: af.field_name || `field_${idx}`,
-          label: af.field_label || af.field_name,
-          x: parseFloat(af.x_percent) || 50,
-          y: parseFloat(af.y_percent) || 50,
-          font_size: parseInt(af.font_size, 10) || 28,
-          font_family: af.font_family || font_family || 'Cinzel',
-          font_color: af.color || primary_color || '#123B32',
-          font_weight: af.field_name === 'recipient_name' ? 'bold' : 'normal',
-          align: af.align || 'center',
-          opacity: 1.0,
-          is_required: af.field_name !== 'qr_code',
-          is_qr: af.is_qr || af.field_name === 'qr_code'
-        }));
+        const mapped = aiFields.map((af, idx) => {
+          const rawKey = af.field_name || `field_${idx}`;
+          const isCertId = rawKey === 'certificate_code' || rawKey === 'certificate_id' || rawKey === 'cert_id' || (af.field_label && af.field_label.toLowerCase().includes('certificate id'));
+          const normalizedKey = isCertId ? 'unique_code' : rawKey;
+          const normalizedLabel = isCertId ? 'Certificate ID' : (af.field_label || af.field_name);
+
+          return {
+            id: `ai_field_${idx}_${Date.now()}`,
+            field_key: normalizedKey,
+            label: normalizedLabel,
+            x: parseFloat(af.x_percent) || 50,
+            y: parseFloat(af.y_percent) || 50,
+            font_size: parseInt(af.font_size, 10) || 28,
+            font_family: af.font_family || font_family || 'Cinzel',
+            font_color: af.color || primary_color || '#123B32',
+            font_weight: af.field_name === 'recipient_name' ? 'bold' : 'normal',
+            align: af.align || 'center',
+            opacity: 1.0,
+            is_required: af.field_name !== 'qr_code',
+            is_qr: af.is_qr || af.field_name === 'qr_code'
+          };
+        });
         setFields(mapped);
         setSelectedFieldId(mapped[0]?.id);
       }
@@ -475,20 +482,26 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
                           cornerRadius={4}
                         />
                       )}
-                      <Text
-                        text={`[${f.label}]`}
-                        x={-150}
-                        y={-previewFontSize / 2}
-                        width={300}
-                        align={f.align || 'center'}
-                        fontSize={previewFontSize}
-                        fontFamily={f.font_family || 'sans-serif'}
-                        fontStyle={f.font_weight === 'bold' ? 'bold' : 'normal'}
-                        textDecoration={f.is_underline ? 'underline' : ''}
-                        fill={f.font_color || '#ffffff'}
-                        shadowColor={isSelected ? '#4f46e5' : '#000000'}
-                        shadowBlur={isSelected ? 6 : 0}
-                      />
+                      {(() => {
+                        const isCertId = f.field_key === 'unique_code' || f.field_key === 'certificate_id' || f.field_key === 'certificate_code' || (f.label && f.label.toLowerCase().includes('certificate id'));
+                        const displayText = isCertId ? 'CERT-2026-XXXXXX' : `[${f.label}]`;
+                        return (
+                          <Text
+                            text={displayText}
+                            x={-150}
+                            y={-previewFontSize / 2}
+                            width={300}
+                            align={f.align || 'center'}
+                            fontSize={previewFontSize}
+                            fontFamily={f.font_family || 'sans-serif'}
+                            fontStyle={f.font_weight === 'bold' ? 'bold' : 'normal'}
+                            textDecoration={f.is_underline ? 'underline' : ''}
+                            fill={f.font_color || '#ffffff'}
+                            shadowColor={isSelected ? '#4f46e5' : '#000000'}
+                            shadowBlur={isSelected ? 6 : 0}
+                          />
+                        );
+                      })()}
                     </Group>
                   );
                 })}
@@ -541,6 +554,13 @@ export default function VisualTemplateEditor({ template, initialFields = [], onS
 
           {selectedField ? (
             <div className="flex flex-column gap-3">
+              {(selectedField.field_key === 'unique_code' || selectedField.field_key === 'certificate_id' || selectedField.field_key === 'certificate_code' || (selectedField.label && selectedField.label.toLowerCase().includes('certificate id'))) && (
+                <div className="p-2 border-round surface-100 border-1 border-300 text-xs text-700 flex align-items-center gap-2">
+                  <Sparkles size={14} className="text-teal-600 flex-shrink-0" />
+                  <span><strong>System Autogenerated:</strong> This unique certificate ID is generated automatically upon issuance and will not be asked in user forms.</span>
+                </div>
+              )}
+
               {/* Label & Key */}
               <div>
                 <label className="text-xs font-semibold text-700 block mb-1">Display Label</label>

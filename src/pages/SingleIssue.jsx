@@ -10,6 +10,28 @@ import { UserCheck, Mail, Send, CheckCircle, ExternalLink, Download, Share2, Spa
 import confetti from 'canvas-confetti';
 import api, { getApiUrl } from '../services/api';
 
+// Helper to detect system-managed / non-custom fields
+const isSystemField = (fieldKey, isQr, label) => {
+  if (isQr) return true;
+  const key = (fieldKey || '').toLowerCase();
+  const lbl = (label || '').toLowerCase();
+  const systemKeys = [
+    'recipient_name', 'name', 'recipient_email', 'email',
+    'unique_code', 'certificate_id', 'certificate_code', 'cert_id', 'cert_code', 'code',
+    'qr_code'
+  ];
+  if (systemKeys.includes(key)) return true;
+  if (lbl.includes('certificate id') || lbl.includes('cert id') || lbl.includes('qr code')) return true;
+  return false;
+};
+
+const isCertIdField = (fieldKey, label) => {
+  const key = (fieldKey || '').toLowerCase();
+  const lbl = (label || '').toLowerCase();
+  const idKeys = ['unique_code', 'certificate_id', 'certificate_code', 'cert_id', 'cert_code', 'code'];
+  return idKeys.includes(key) || lbl.includes('certificate id') || lbl.includes('cert id');
+};
+
 export default function SingleIssue() {
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
@@ -44,13 +66,17 @@ export default function SingleIssue() {
       api.get(`/templates/${selectedTemplateId}`).then((res) => {
         const fields = res.data.fields || [];
         setTemplateFields(fields);
-        // Pre-fill default values
+        // Pre-fill default values for custom dynamic fields only
         const initial = {};
         fields.forEach((f) => {
-          if (f.field_key !== 'recipient_name' && f.field_key !== 'unique_code' && !f.is_qr) {
-            if (f.field_key === 'course_title') initial[f.field_key] = res.data.template.name;
-            else if (f.field_key === 'issue_date') initial[f.field_key] = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-            else initial[f.field_key] = '';
+          if (!isSystemField(f.field_key, f.is_qr, f.label)) {
+            if (f.field_key === 'course_title' || f.field_key.includes('course') || f.field_key.includes('title')) {
+              initial[f.field_key] = res.data.template?.name || '';
+            } else if (f.field_key === 'issue_date' || f.field_key.includes('date')) {
+              initial[f.field_key] = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            } else {
+              initial[f.field_key] = '';
+            }
           }
         });
         setFieldData(initial);
@@ -154,29 +180,33 @@ export default function SingleIssue() {
                 </div>
               </div>
 
-              {templateFields.length > 0 && (
-                <div className="surface-50 border-round-lg p-3 border-1 border-200">
-                  <span className="text-xs font-bold text-700 uppercase tracking-wider block mb-2">
-                    Template Dynamic Fields ({templateFields.length})
-                  </span>
-                  <div className="grid">
-                    {templateFields.map((f) => (
-                      <div key={f.id} className="col-12 sm:col-6">
-                        <label className="block text-800 text-xs font-medium mb-1">
-                          {f.label} {f.is_required && '*'}
-                        </label>
-                        <InputText
-                          value={fieldData[f.field_key] || ''}
-                          onChange={(e) => handleFieldChange(f.field_key, e.target.value)}
-                          placeholder={`Enter ${f.label.toLowerCase()}`}
-                          className="w-full p-inputtext-sm"
-                          required={f.is_required}
-                        />
-                      </div>
-                    ))}
+              {(() => {
+                const dynamicFields = templateFields.filter((f) => !isSystemField(f.field_key, f.is_qr, f.label));
+                if (dynamicFields.length === 0) return null;
+                return (
+                  <div className="surface-50 border-round-lg p-3 border-1 border-200">
+                    <span className="text-xs font-bold text-700 uppercase tracking-wider block mb-2">
+                      Template Custom Fields ({dynamicFields.length})
+                    </span>
+                    <div className="grid">
+                      {dynamicFields.map((f) => (
+                        <div key={f.id} className="col-12 sm:col-6">
+                          <label className="block text-800 text-xs font-medium mb-1">
+                            {f.label} {f.is_required && '*'}
+                          </label>
+                          <InputText
+                            value={fieldData[f.field_key] || ''}
+                            onChange={(e) => handleFieldChange(f.field_key, e.target.value)}
+                            placeholder={`Enter ${f.label.toLowerCase()}`}
+                            className="w-full p-inputtext-sm"
+                            required={f.is_required}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="flex align-items-center justify-content-between p-3 surface-50 border-round-lg border-1 border-200">
                 <div className="flex align-items-center gap-2">
@@ -230,10 +260,15 @@ export default function SingleIssue() {
                     {templateFields && templateFields.length > 0 ? (
                       templateFields.map((f) => {
                         let textVal = '';
-                        if (f.field_key === 'recipient_name') textVal = recipientName || 'Recipient Full Name';
-                        else if (f.field_key === 'unique_code' || f.field_key === 'certificate_id') textVal = 'CERT-2026-XXXXXX';
-                        else if (f.field_key === 'issue_date' || f.field_key === 'date') textVal = fieldData[f.field_key] || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                        else textVal = fieldData[f.field_key] !== undefined && fieldData[f.field_key] !== '' ? String(fieldData[f.field_key]) : (f.label || '');
+                        if (f.field_key === 'recipient_name' || f.field_key === 'name') {
+                          textVal = recipientName || 'Recipient Full Name';
+                        } else if (isCertIdField(f.field_key, f.label)) {
+                          textVal = 'CERT-2026-XXXXXX';
+                        } else if (f.field_key === 'issue_date' || f.field_key === 'date') {
+                          textVal = fieldData[f.field_key] || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                        } else {
+                          textVal = fieldData[f.field_key] !== undefined && fieldData[f.field_key] !== '' ? String(fieldData[f.field_key]) : (f.label || '');
+                        }
 
                         if (f.is_qr) {
                           const baseSize = parseInt(f.font_size, 10) || 32;
