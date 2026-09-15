@@ -10,6 +10,7 @@ import TemplateManager from './pages/TemplateManager';
 import SingleIssue from './pages/SingleIssue';
 import BulkIssue from './pages/BulkIssue';
 import CertificateList from './pages/CertificateList';
+import ApiIntegrationManager from './pages/ApiIntegrationManager';
 import PublicVerify from './pages/PublicVerify';
 import RecipientPortal from './pages/RecipientPortal';
 import AiChatbot from './components/AiChatbot';
@@ -106,6 +107,14 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <CertificateList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/integrations"
+            element={
+              <ProtectedRoute>
+                <ApiIntegrationManager />
               </ProtectedRoute>
             }
           />

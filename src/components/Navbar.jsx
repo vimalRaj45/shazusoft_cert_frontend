@@ -12,7 +12,8 @@ import {
   LogOut,
   Search,
   Menu,
-  BarChart3
+  BarChart3,
+  Zap
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -27,6 +28,7 @@ export default function Navbar() {
     { label: 'Single Issue', path: '/admin/issue-single', icon: UserCheck },
     { label: 'Bulk CSV Issue', path: '/admin/issue-bulk', icon: FileSpreadsheet },
     { label: 'Certificates', path: '/admin/certificates', icon: ShieldCheck },
+    { label: 'API Integrations', path: '/admin/integrations', icon: Zap },
   ];
 
   const handleLogout = () => {
