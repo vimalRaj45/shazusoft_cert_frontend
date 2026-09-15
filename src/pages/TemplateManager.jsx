@@ -97,20 +97,27 @@ export default function TemplateManager() {
   };
 
   const deleteTemplate = (template) => {
+    const certCount = template.cert_count || 0;
+    const warningMessage = certCount > 0
+      ? `Warning: ${certCount} certificate(s) were issued with "${template.name}". Deleting this template will permanently remove the template, all field coordinates, and all ${certCount} issued certificate records. Are you sure you want to proceed?`
+      : `Are you sure you want to permanently delete the template "${template.name}"? All associated layout field coordinates will be deleted.`;
+
     confirmDialog({
-      message: `Are you sure you want to permanently delete the template "${template.name}"? All associated layout field coordinates will be deleted.`,
-      header: 'Delete Certificate Template',
+      message: warningMessage,
+      header: certCount > 0 ? 'Force Delete Template & Certificates' : 'Delete Certificate Template',
       icon: 'pi pi-exclamation-triangle',
       acceptClassName: 'p-button-danger font-bold',
-      acceptLabel: 'Yes, Delete Template',
+      acceptLabel: certCount > 0 ? 'Yes, Force Delete All' : 'Yes, Delete Template',
       rejectLabel: 'Cancel',
       accept: async () => {
+        const toastId = toast.loading('Deleting template...');
         try {
-          await api.delete(`/templates/${template.id}`);
-          toast.success('Template removed successfully');
+          const url = certCount > 0 ? `/templates/${template.id}?force=true` : `/templates/${template.id}`;
+          const res = await api.delete(url);
+          toast.success(res.data.message || 'Template removed successfully', { id: toastId });
           fetchTemplates();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Cannot delete template');
+          toast.error(err.response?.data?.message || 'Cannot delete template', { id: toastId });
         }
       }
     });

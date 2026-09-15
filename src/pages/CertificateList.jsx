@@ -8,7 +8,7 @@ import { Tag } from 'primereact/tag';
 import { Dialog } from 'primereact/dialog';
 import { confirmDialog } from 'primereact/confirmdialog';
 import toast from 'react-hot-toast';
-import { ShieldCheck, Search, Download, QrCode, Mail, Ban, CheckCircle2, Copy, ExternalLink, Activity } from 'lucide-react';
+import { ShieldCheck, Search, Download, QrCode, Mail, Ban, CheckCircle2, Copy, ExternalLink, Activity, Trash2 } from 'lucide-react';
 import api, { getApiUrl } from '../services/api';
 
 export default function CertificateList() {
@@ -21,6 +21,7 @@ export default function CertificateList() {
   const [templateFilter, setTemplateFilter] = useState('');
   const [page, setPage] = useState(0);
   const [rows, setRows] = useState(15);
+  const [selectedCertificates, setSelectedCertificates] = useState([]);
 
   // Dialogs
   const [selectedCert, setSelectedCert] = useState(null);
@@ -64,6 +65,51 @@ export default function CertificateList() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = (cert) => {
+    confirmDialog({
+      message: `Are you sure you want to permanently delete the certificate for "${cert.recipient_name}" (${cert.unique_code})? This cannot be undone.`,
+      header: 'Delete Certificate Permanently',
+      icon: 'pi pi-trash',
+      acceptClassName: 'p-button-danger font-bold',
+      acceptLabel: 'Yes, Delete Permanently',
+      rejectLabel: 'Cancel',
+      accept: async () => {
+        try {
+          await api.delete(`/certificates/${cert.id}`);
+          toast.success('Certificate deleted successfully');
+          setSelectedCertificates(prev => prev.filter(c => c.id !== cert.id));
+          fetchCertificates();
+        } catch (err) {
+          toast.error(err.response?.data?.message || 'Failed to delete certificate');
+        }
+      }
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedCertificates.length === 0) return;
+    confirmDialog({
+      message: `Are you sure you want to permanently delete ${selectedCertificates.length} selected certificate(s)? This action cannot be undone.`,
+      header: `Delete ${selectedCertificates.length} Certificates`,
+      icon: 'pi pi-trash',
+      acceptClassName: 'p-button-danger font-bold',
+      acceptLabel: `Delete ${selectedCertificates.length} Certificates`,
+      rejectLabel: 'Cancel',
+      accept: async () => {
+        const toastId = toast.loading(`Deleting ${selectedCertificates.length} certificate(s)...`);
+        try {
+          const ids = selectedCertificates.map(c => c.id);
+          const res = await api.post('/certificates/bulk-delete', { ids });
+          toast.success(res.data.message || 'Certificates deleted successfully', { id: toastId });
+          setSelectedCertificates([]);
+          fetchCertificates();
+        } catch (err) {
+          toast.error(err.response?.data?.message || 'Failed to delete certificates', { id: toastId });
+        }
+      }
+    });
   };
 
   const handleRevoke = (cert) => {
@@ -208,6 +254,15 @@ export default function CertificateList() {
               className="p-inputtext-sm w-full sm:w-11rem"
             />
 
+            {selectedCertificates.length > 0 && (
+              <Button
+                label={`Delete Selected (${selectedCertificates.length})`}
+                icon={<Trash2 size={15} className="mr-1.5" />}
+                className="p-button-danger p-button-sm font-bold shadow-1"
+                onClick={handleBulkDelete}
+              />
+            )}
+
             <span className="badge-source font-bold whitespace-nowrap">
               {totalRecords} Records
             </span>
@@ -224,6 +279,9 @@ export default function CertificateList() {
           first={page * rows}
           rows={rows}
           totalRecords={totalRecords}
+          selection={selectedCertificates}
+          onSelectionChange={(e) => setSelectedCertificates(e.value)}
+          dataKey="id"
           onPage={(e) => {
             setPage(e.page);
             setRows(e.rows);
@@ -233,6 +291,7 @@ export default function CertificateList() {
           size="normal"
           emptyMessage="No certificates found matching your search."
         >
+          <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
           <Column
             field="recipient_name"
             header="Recipient Name"
@@ -355,6 +414,16 @@ export default function CertificateList() {
                     <CheckCircle2 size={16} />
                   </button>
                 )}
+
+                {/* Delete Certificate Permanently */}
+                <button
+                  type="button"
+                  className="action-btn action-btn-danger"
+                  title="Delete Certificate Permanently"
+                  onClick={() => handleDelete(r)}
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             )}
           />
