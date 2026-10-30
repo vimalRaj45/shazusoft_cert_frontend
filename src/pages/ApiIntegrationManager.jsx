@@ -279,9 +279,10 @@ export default function ApiIntegrationManager() {
     const activeKey =
       createdKeyData?.apiKey ||
       (apiKeys[0] ? `${apiKeys[0].key_prefix}xxxxxxxx` : 'cv_live_your_api_key_here');
-    const apiUrl =
-      (window.location.origin.includes('localhost') ? 'http://localhost:5000' : window.location.origin) +
-      '/api/v1/external/certificates/issue';
+    const backendBase = import.meta.env.VITE_API_URL
+      ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
+      : 'https://shazusoft-cert-backend-0aja.onrender.com';
+    const apiUrl = `${backendBase}/api/v1/external/certificates/issue`;
 
     const assoc = mappings[0]?.association_name || 'IEEE Student Chapter';
 
