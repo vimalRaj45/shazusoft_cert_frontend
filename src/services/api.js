@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+const RAW_API_URL = (import.meta.env.VITE_API_URL || '/api').trim();
+const RESOLVED_API_URL = (RAW_API_URL.includes('onrender.com') && !RAW_API_URL.includes('shazusoft-cert-backend-0aja.onrender.com'))
+  ? 'https://shazusoft-cert-backend-0aja.onrender.com/api'
+  : RAW_API_URL;
+
 export const getApiUrl = (path = '') => {
-  const base = import.meta.env.VITE_API_URL || '/api';
+  const base = RESOLVED_API_URL;
   const cleanBase = base.replace(/\/+$/, '');
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   
@@ -14,7 +19,7 @@ export const getApiUrl = (path = '') => {
 };
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api'
+  baseURL: RESOLVED_API_URL
 });
 
 let pendingRequestsCount = 0;
