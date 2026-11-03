@@ -131,8 +131,8 @@ function AppRoutes() {
         </Routes>
       </main>
 
-      {/* Global AI RAG Chatbot Copilot */}
-      <AiChatbot />
+      {/* Global AI RAG Chatbot Copilot (Admins only) */}
+      {isAuthenticated && <AiChatbot />}
 
       {/* Global Single ConfirmDialog Instance */}
       <ConfirmDialog />

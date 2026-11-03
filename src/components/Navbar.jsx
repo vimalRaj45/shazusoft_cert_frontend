@@ -22,6 +22,14 @@ export default function Navbar() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Recipient and verification pages should not show menu icons or admin login button
+  const recipientPaths = ['/', '/lookup', '/get-certificates', '/download', '/my-certificates'];
+  const isRecipientPage = recipientPaths.includes(location.pathname) || location.pathname.startsWith('/verify');
+
+  if (isRecipientPage) {
+    return null;
+  }
+
   const navItems = [
     { label: 'Dashboard', path: '/admin', icon: BarChart3 },
     { label: 'Templates', path: '/admin/templates', icon: Layers },
