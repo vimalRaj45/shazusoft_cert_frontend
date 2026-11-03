@@ -68,6 +68,9 @@ function AppRoutes() {
           <Route path="/login" element={<AdminLogin />} />
           <Route path="/verify/:code" element={<PublicVerify />} />
           <Route path="/lookup" element={<RecipientPortal />} />
+          <Route path="/get-certificates" element={<RecipientPortal />} />
+          <Route path="/download" element={<RecipientPortal />} />
+          <Route path="/my-certificates" element={<RecipientPortal />} />
 
           {/* Admin Protected Routes */}
           <Route
@@ -119,10 +122,10 @@ function AppRoutes() {
             }
           />
 
-          {/* Root Fallback */}
+          {/* Root Route: If authenticated go to admin dashboard, otherwise show public certificate download portal */}
           <Route
             path="/"
-            element={<Navigate to={isAuthenticated ? "/admin" : "/login"} replace />}
+            element={isAuthenticated ? <Navigate to="/admin" replace /> : <RecipientPortal />}
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

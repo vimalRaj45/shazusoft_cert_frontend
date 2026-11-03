@@ -125,7 +125,7 @@ export default function Navbar() {
         <div className="flex align-items-center gap-1.5 sm:gap-2 flex-nowrap flex-shrink-0">
           <Link to="/lookup" className="no-underline hidden sm:inline-flex">
             <Button
-              label="Recipient Portal"
+              label="Download Certificate"
               icon={<Search size={13} className="mr-1" />}
               className="p-button-outlined p-button-sm p-button-secondary font-bold text-xs py-1.5 px-2.5"
             />
@@ -226,7 +226,7 @@ export default function Navbar() {
                 style={{ color: '#527A68', borderLeft: '3px solid transparent', paddingLeft: '12px' }}
               >
                 <Search size={18} style={{ color: '#527A68' }} />
-                <span>Recipient Portal</span>
+                <span>Download Certificate</span>
               </Link>
             </div>
           </div>
