@@ -10,17 +10,10 @@ import {
   Download,
   ExternalLink,
   Award,
-  CheckCircle2,
-  ShieldCheck,
-  Mail,
   Copy,
   Check,
   Eye,
-  AlertCircle,
-  HelpCircle,
-  Sparkles,
-  ArrowRight,
-  FileCheck2
+  AlertCircle
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import axios from 'axios';
@@ -204,40 +197,12 @@ export default function RecipientPortal() {
             />
           </div>
 
-          <div className="inline-flex align-items-center gap-2 px-3 py-1 border-round-full mb-2" style={{ background: '#E8EFEB', border: '1px solid #D3DDD7' }}>
-            <Sparkles size={14} style={{ color: '#123B32' }} />
-            <span className="text-xs font-bold" style={{ color: '#123B32' }}>
-              Official Student & Recipient Portal
-            </span>
-          </div>
-
           <h1 className="font-bold text-2xl md:text-4xl m-0" style={{ color: '#123B32', letterSpacing: '-0.5px' }}>
             Download Your Certificate
           </h1>
-          <p className="text-xs md:text-sm font-semibold mt-2" style={{ color: '#527A68', maxWidth: '620px', margin: '8px auto 0' }}>
-            Enter the email address you registered with to instantly view, verify, and download your verified course or training certificates.
+          <p className="text-xs md:text-sm font-semibold mt-2" style={{ color: '#527A68', maxWidth: '580px', margin: '8px auto 0' }}>
+            Enter the email address provided to us to find and download your certificate.
           </p>
-        </div>
-
-        {/* Helpful Email Delivery Notice */}
-        <div
-          className="border-round-xl p-3 mb-4 flex align-items-center gap-3 shadow-1"
-          style={{ background: '#EFF6F3', border: '1.5px solid #C2D9CE' }}
-        >
-          <div
-            className="flex align-items-center justify-content-center border-round-circle flex-shrink-0"
-            style={{ width: '36px', height: '36px', background: '#123B32', color: '#FFFFFF' }}
-          >
-            <Mail size={18} />
-          </div>
-          <div className="flex-1">
-            <div className="font-bold text-xs md:text-sm" style={{ color: '#123B32' }}>
-              Didn't receive your certificate email?
-            </div>
-            <div className="text-xs mt-0.5" style={{ color: '#3A6352' }}>
-              Don't worry! All issued certificates are safely archived here. Just type your registered email below to download your official PDF directly.
-            </div>
-          </div>
         </div>
 
         {/* Search Card */}
@@ -247,7 +212,7 @@ export default function RecipientPortal() {
         >
           <form onSubmit={handleSearch} className="flex flex-column gap-3">
             <label className="font-bold text-xs text-uppercase tracking-wider" style={{ color: '#123B32' }}>
-              Registered Email Address or Certificate ID
+              Email Address
             </label>
 
             <div className="flex flex-column sm:flex-row gap-2">
@@ -256,7 +221,7 @@ export default function RecipientPortal() {
                 <InputText
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="e.g. yourname@example.com or SS-2026-XXXX"
+                  placeholder="e.g. name@example.com or Certificate ID"
                   className="w-full text-sm py-3 font-medium"
                   style={{ borderRadius: '10px' }}
                   autoFocus
@@ -267,7 +232,7 @@ export default function RecipientPortal() {
               <div className="flex gap-2">
                 <Button
                   type="submit"
-                  label={loading ? 'Searching...' : 'Find Certificates'}
+                  label={loading ? 'Searching...' : 'Find Certificate'}
                   icon={<Search size={16} className="mr-1.5" />}
                   className="p-button-primary font-bold text-sm px-4 py-3"
                   style={{
@@ -296,13 +261,6 @@ export default function RecipientPortal() {
                   aria-label="Scan QR Code"
                 />
               </div>
-            </div>
-
-            <div className="flex align-items-center justify-content-between text-xs text-500 mt-1">
-              <span>💡 Tip: Press <strong>Enter</strong> to search instantly</span>
-              <span className="cursor-pointer font-semibold text-primary underline" onClick={() => setScannerOpen(true)}>
-                Have a paper QR code? Scan here
-              </span>
             </div>
           </form>
         </div>
@@ -451,73 +409,23 @@ export default function RecipientPortal() {
           </div>
         ) : searched && !loading ? (
           <div
-            className="border-round-2xl p-5 text-center shadow-1 mb-5"
+            className="border-round-2xl p-4 md:p-5 text-center shadow-1 mb-5"
             style={{ background: '#FFFFFF', border: '1.5px solid #D3DDD7' }}
           >
             <div
-              className="inline-flex align-items-center justify-content-center border-round-circle mb-3"
-              style={{ width: '48px', height: '48px', background: '#FEF2F2', color: '#DC2626' }}
+              className="inline-flex align-items-center justify-content-center border-round-circle mb-2"
+              style={{ width: '44px', height: '44px', background: '#FEF2F2', color: '#DC2626' }}
             >
-              <AlertCircle size={24} />
+              <AlertCircle size={22} />
             </div>
-            <h3 className="font-bold text-lg m-0" style={{ color: '#123B32' }}>
-              No Certificates Found
+            <h3 className="font-bold text-base md:text-lg m-0" style={{ color: '#123B32' }}>
+              No Certificate Found
             </h3>
-            <p className="text-sm font-semibold mt-2 mb-3" style={{ color: '#527A68', maxWidth: '480px', margin: '8px auto 16px' }}>
-              We could not find any certificates issued to "<strong>{query}</strong>".
+            <p className="text-xs md:text-sm font-semibold mt-2 mb-0" style={{ color: '#527A68' }}>
+              We couldn't find any certificate for "<strong>{query}</strong>". Please check your email spelling and try again.
             </p>
-
-            <div
-              className="text-left p-3 border-round-xl max-w-28rem mx-auto text-xs"
-              style={{ background: '#F5F3EC', border: '1px solid #D3DDD7', color: '#123B32' }}
-            >
-              <div className="font-bold mb-1">Troubleshooting tips:</div>
-              <ul className="m-0 pl-3 leading-normal">
-                <li>Check for typos or spelling errors in your email address.</li>
-                <li>Make sure this is the exact email address you used when registering for the training/course.</li>
-                <li>If you have your Certificate ID from a message or invoice, try entering that instead.</li>
-                <li>If your certificate was issued within the last few minutes, please refresh and try again shortly.</li>
-              </ul>
-            </div>
           </div>
         ) : null}
-
-        {/* Quick FAQ / Guidance Section */}
-        <div
-          className="border-round-2xl p-4 shadow-1"
-          style={{ background: '#FFFFFF', border: '1.5px solid #D3DDD7' }}
-        >
-          <div className="flex align-items-center gap-2 mb-3">
-            <HelpCircle size={18} style={{ color: '#123B32' }} />
-            <h3 className="font-bold text-sm md:text-base m-0" style={{ color: '#123B32' }}>
-              Frequently Asked Questions
-            </h3>
-          </div>
-
-          <div className="grid">
-            <div className="col-12 md:col-6">
-              <div className="p-3 border-round-xl h-full" style={{ background: '#F9FAF7', border: '1px solid #E5EBE8' }}>
-                <div className="font-bold text-xs mb-1" style={{ color: '#123B32' }}>
-                  Why didn't I receive my certificate email?
-                </div>
-                <div className="text-xs" style={{ color: '#527A68', lineHeight: 1.5 }}>
-                  Automated emails can occasionally land in Spam, Junk, or Promotions folders, or be delayed by email providers. Downloading your official certificate directly from this portal provides the exact same signed, authentic PDF.
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 md:col-6">
-              <div className="p-3 border-round-xl h-full" style={{ background: '#F9FAF7', border: '1px solid #E5EBE8' }}>
-                <div className="font-bold text-xs mb-1" style={{ color: '#123B32' }}>
-                  Is the downloaded certificate verifiable?
-                </div>
-                <div className="text-xs" style={{ color: '#527A68', lineHeight: 1.5 }}>
-                  Yes! Every PDF includes an embedded cryptographic QR code and unique certificate number that employers or universities can scan anytime to verify authenticity.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
       </div>
 
