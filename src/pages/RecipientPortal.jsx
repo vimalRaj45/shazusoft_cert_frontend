@@ -81,27 +81,32 @@ export default function RecipientPortal() {
     executeSearch(query);
   };
 
-  // One-click direct PDF download with visual feedback
+  // Direct PDF download with "Please wait" feedback
   const handleDownload = async (cert) => {
     setDownloadingCode(cert.unique_code);
+    const toastId = toast.loading('Please wait, generating your certificate PDF...');
     try {
-      const downloadUrl = getApiUrl(`/public/certificates/${encodeURIComponent(cert.unique_code)}/download`);
+      const downloadUrl = getApiUrl(`/public/certificates/${encodeURIComponent(cert.unique_code)}/download?direct=1`);
       
+      const response = await axios.get(downloadUrl, { responseType: 'blob' });
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
-      link.href = downloadUrl;
+      link.href = blobUrl;
       const safeName = (cert.recipient_name || 'Certificate').replace(/[^a-zA-Z0-9_-]/g, '_');
       link.setAttribute('download', `Certificate_${safeName}_${cert.unique_code.substring(0, 8)}.pdf`);
-      link.setAttribute('target', '_blank');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
 
-      toast.success('Your certificate PDF download has started!');
+      toast.success('Your certificate PDF has been downloaded!', { id: toastId });
     } catch (err) {
       console.error('Download error:', err);
-      toast.error('Download failed. Please try again.');
+      toast.dismiss(toastId);
+      // Fallback: open in new tab (displays the backend "Please wait" loading page)
+      window.open(getApiUrl(`/public/certificates/${encodeURIComponent(cert.unique_code)}/download`), '_blank');
     } finally {
-      setTimeout(() => setDownloadingCode(null), 2500);
+      setDownloadingCode(null);
     }
   };
 
@@ -387,7 +392,7 @@ export default function RecipientPortal() {
                       {!isRevoked ? (
                         <Button
                           type="button"
-                          label={isDownloading ? 'Preparing PDF...' : 'Download PDF'}
+                          label={isDownloading ? 'Please wait...' : 'Download PDF'}
                           icon={<Download size={15} className="mr-1" />}
                           className="p-button-primary font-bold text-xs py-2 px-3.5 flex-1 sm:flex-none justify-content-center"
                           style={{
